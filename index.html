@@ -987,6 +987,11 @@ function renderReport(){
   const g=grades(),f=n=>(Math.round(n*100)/100).toFixed(2);
   const rows=[...TICKETS.map(t=>[t,P.tickets[t.id]]),...P.urgent.map(x=>[urgentDef(x),P.tickets[x.id]])];
   $('#main').innerHTML=`<section class="card"><h2>Informe final · Práctica global UD2</h2>
+   <div class="note noprint"><b>📤 Entrega obligatoria:</b> esta nota <b>no le llega sola a tu profesor</b>. Para entregarla:<ol style="margin:6px 0 0;padding-left:20px">
+    <li>Pulsa <b>«🖨 Guardar como PDF»</b> (abajo del todo).</li>
+    <li>En la ventana de impresión, en <b>Destino</b> elige <b>«Guardar como PDF»</b> y guárdalo con el nombre <code>${esc(pdfName())}</code>.</li>
+    <li><b>Sube ese PDF a la tarea</b> que te indique tu profesor (Moodle, Classroom…).</li></ol>
+    <p class="small" style="margin:6px 0 0">Si todavía te falta algo (tickets o misión real), termínalo antes de entregar: el informe muestra el estado en el momento en que lo guardas.</p></div>
    <table class="tbl"><tr><th>Alumno/a</th><td>${esc(P.student.nombre)} ${esc(P.student.apellidos)}</td><th>Grupo</th><td>${esc(P.student.grupo||'—')}</td></tr>
    <tr><th>Inicio</th><td>${esc(P.started)}</td><th>Informe</th><td>${esc(now())}</td></tr>
    <tr><th>Nueva incorporación</th><td>${esc(P.hire.full)}</td><th>Reinicios</th><td>${resets()}</td></tr></table>
@@ -1000,8 +1005,9 @@ function renderReport(){
    <h3>Fase 3 · Misión real</h3>${P.real?checksHtml(P.real.checks)+`<p class="small muted">Validado el ${esc(P.real.at)}. El cambio obligatorio de contraseña de la misión A no se puede comprobar con <code>net user</code>: tu profesor puede revisarlo en tu SRV01.</p>`:'<p>Sin validar.</p>'}
    <details><summary>Registro de actividad en el simulador (${P.log.length} entradas)</summary><pre class="small">${esc(P.log.join('\n'))}</pre></details>
    <p class="tip noprint">📌 Cuando termines, vuelve a habilitar a Pedro en tu SRV01 (<code>net user plopez /active:yes</code>) para las próximas prácticas.</p>
-   <div class="row noprint"><button class="btn primary" data-act="print">🖨 Guardar como PDF / imprimir</button></div></section>`;
+   <div class="row noprint"><button class="btn primary" data-act="print">🖨 Guardar como PDF</button><span class="muted small" style="align-self:center">Después, súbelo a la tarea de tu profesor.</span></div></section>`;
 }
+const pdfName=()=>`UD2_SurTech_${P.student.apellidos}_${P.student.nombre}.pdf`.replace(/\s+/g,'_');
 function localGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function render(){
   renderHeader();
@@ -1023,7 +1029,7 @@ const ACT={
   copy:a=>{const t=a.dataset.txt;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Copiado al portapapeles ✔'),()=>{toast('Selecciona el texto y cópialo con Ctrl+C');});},
   lab1:()=>{const text=$('#lab1-in').value;const L=lab1Checks(text);P.lab1={text,checks:L,at:now()};logEv(`Fase 1: ${L.filter(c=>c.ok).length}/${L.length}`);save();$('#lab1-res').innerHTML=resLab1(L);renderPhase1();},
   real:()=>{const text=$('#real-in').value;const L=realChecks(text);const ok=L.filter(c=>c.ok).length;P.real={text,checks:L,ok,total:L.length,at:now()};logEv(`Fase 3: ${ok}/${L.length}`);save();renderPhase3();renderHeader();$('#real-res').scrollIntoView({behavior:'smooth'});},
-  print:()=>window.print(),
+  print:()=>{const t=document.title;document.title=pdfName().replace(/\.pdf$/,'');window.print();document.title=t;},
   reset:()=>{if(!P)return;const v=prompt(`Se borrará TODO el progreso de ${P.student.nombre} ${P.student.apellidos} en este navegador. Escribe REINICIAR para confirmar:`);if(v!=='REINICIAR')return;
     try{localStorage.setItem(RKEY+':'+P.seed,String(resets()+1));localStorage.removeItem(pkey(P.seed));localStorage.removeItem(CUR);}catch(e){}P=null;render();},
   logout:()=>{save();try{localStorage.removeItem(CUR);}catch(e){}P=null;render();},
