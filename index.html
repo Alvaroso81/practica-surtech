@@ -901,10 +901,33 @@ function renderLogin(){
     if(!st.nombre||!st.apellidos)return;P=newProgress(st);logEv(`Inicio de la práctica: ${st.nombre} ${st.apellidos}`);save();render();};
 }
 function copyBtn(txt){return `<button class="btn small" data-act="copy" data-txt="${esc(txt)}">📋 Copiar</button>`;}
+const PREP=`net user mgarcia Temporal.2026 /add /fullname:"María García" /comment:"Contabilidad"
+net user plopez Temporal.2026 /add /fullname:"Pedro López" /comment:"Ventas"
+net user aruiz Temporal.2026 /add /fullname:"Ana Ruiz" /comment:"Contabilidad"
+net user mgarcia /active:yes
+net user plopez /active:yes
+net user aruiz /active:yes
+net localgroup Ventas /add
+net localgroup Contabilidad /add
+net localgroup Administracion /add
+net localgroup Ventas plopez /add
+net localgroup Contabilidad mgarcia /add
+net localgroup Contabilidad aruiz /add`;
 function renderPhase1(){
   const c1='(net user & net localgroup Ventas & net localgroup Contabilidad & net localgroup Administracion) | clip';
   $('#main').innerHTML=`<section class="card"><h2>Fase 1 · Comprobación del laboratorio (SRV01 real)</h2>
    <p>Antes de tu primer día comprueba que tu servidor está como lo dejamos en clase. <b>Esta fase no puntúa</b>, pero si algo falla, arréglalo ahora: lo necesitarás en la fase 3.</p>
+   <h3>✅ Lo que debe tener tu SRV01</h3>
+   <table class="tbl"><tr><th>Usuario</th><th>Nombre completo</th><th>Descripción</th><th>Estado</th></tr>
+   <tr><td><code>mgarcia</code></td><td>María García</td><td>Contabilidad</td><td>Habilitada</td></tr>
+   <tr><td><code>plopez</code></td><td>Pedro López</td><td>Ventas</td><td>Habilitada</td></tr>
+   <tr><td><code>aruiz</code></td><td>Ana Ruiz</td><td>Contabilidad</td><td>Habilitada</td></tr></table>
+   <table class="tbl"><tr><th>Grupo local</th><th>Miembros</th></tr>
+   <tr><td><code>Ventas</code></td><td>plopez</td></tr><tr><td><code>Contabilidad</code></td><td>mgarcia, aruiz</td></tr><tr><td><code>Administracion</code> (sin tilde)</td><td>ninguno</td></tr></table>
+   <details><summary><b>¿Te falta algo o vas retrasado? Comandos para dejarlo listo</b></summary>
+   <p class="small muted">Pégalos en CMD como Administrador. Si algo ya existe verás un error («La cuenta ya existe», «Error de sistema 1379» o «1378»): no pasa nada, ignóralo. Contraseña inicial de ejemplo: <code>Temporal.2026</code>.</p>
+   <div class="copyrow"><pre>${esc(PREP)}</pre>${copyBtn(PREP)}</div></details>
+   <h3>Comprobación</h3>
    <ol><li>Arranca <code>SRV01</code> en VirtualBox e inicia sesión como <b>Administrador</b>.</li>
    <li>Abre el símbolo del sistema: <code>Windows + R</code> → <code>cmd</code>.</li>
    <li>Ejecuta este comando (la salida se copia al portapapeles gracias a <code>| clip</code>):</li></ol>
