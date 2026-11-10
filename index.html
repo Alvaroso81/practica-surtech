@@ -1,0 +1,1002 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SurTech · Práctica global UD2</title>
+<style>
+:root{--bg:#0b1220;--panel:#121a2b;--panel2:#18233a;--line:#26324a;--txt:#e6ebf5;--mut:#93a0b8;--acc:#38bdf8;--acc2:#0ea5e9;--ok:#22c55e;--bad:#ef4444;--warn:#f59e0b;--ps:#012456}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--acc)}
+code,pre,.mono{font-family:Consolas,"Cascadia Mono",Menlo,monospace}
+code{background:#0f2036;border:1px solid var(--line);border-radius:4px;padding:0 4px;font-size:.92em}
+pre{background:#07101d;border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow:auto;white-space:pre-wrap;word-break:break-word}
+h1,h2,h3{line-height:1.2;margin:.2em 0 .5em}
+button{font:inherit;cursor:pointer}
+.btn{background:var(--panel2);color:var(--txt);border:1px solid var(--line);border-radius:8px;padding:8px 14px}
+.btn:hover{border-color:var(--acc)}
+.btn.primary{background:var(--acc2);border-color:var(--acc2);color:#00131f;font-weight:600}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.small{padding:4px 10px;font-size:13px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+input,textarea,select{font:inherit;color:inherit}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px;margin:0 auto 18px;max-width:980px}
+.muted{color:var(--mut)}
+.small{font-size:13px}
+.note{background:#2a1d06;border:1px solid #6b4a0c;border-radius:8px;padding:8px 12px}
+.tip{background:#062433;border:1px solid #0c4a6e;border-radius:8px;padding:8px 12px}
+.field{display:block;margin:10px 0}
+.field input,.field textarea{width:100%;background:#0a1322;border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin-top:4px}
+textarea.paste{width:100%;min-height:200px;background:#07101d;border:1px solid var(--line);border-radius:8px;padding:10px;font-family:Consolas,Menlo,monospace;font-size:13px}
+/* header */
+#hdr{position:sticky;top:0;z-index:20;background:#0a1120ee;backdrop-filter:blur(6px);border-bottom:1px solid var(--line);display:flex;gap:14px;align-items:center;padding:8px 16px;flex-wrap:wrap}
+.brand{font-weight:800;letter-spacing:.3px}
+.brand span{color:var(--acc)}
+.steps{display:flex;gap:6px;flex-wrap:wrap}
+.step{border:1px solid var(--line);background:var(--panel);color:var(--mut);border-radius:999px;padding:3px 12px;font-size:13px}
+.step.on{border-color:var(--acc);color:var(--txt);background:#0c2a40}
+.step.done{color:var(--ok)}
+.step:disabled{opacity:.45}
+.pill{margin-left:auto;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:3px 12px;font-size:13px}
+main{padding:18px 16px 40px}
+/* checks */
+.checks{list-style:none;padding:0;margin:10px 0}
+.checks li{padding:6px 10px;border-radius:8px;margin:4px 0;background:var(--panel2);display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap}
+.checks li .ic{width:20px;flex:none;text-align:center}
+.checks li.ok .ic{color:var(--ok)}
+.checks li.ko .ic{color:var(--bad)}
+.checks li .fix{flex-basis:100%;margin-left:28px;font-size:13px;color:var(--mut)}
+.copyrow{display:flex;gap:8px;align-items:stretch}
+.copyrow pre{flex:1;margin:0}
+/* phase 2 */
+.ph2{display:grid;grid-template-columns:220px minmax(330px,1fr) minmax(480px,1.35fr);gap:12px;align-items:start}
+@media (max-width:1150px){.ph2{grid-template-columns:1fr}}
+.inbox,.ticket,.server{background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.inbox{padding:10px;position:sticky;top:64px}
+.inbox h3{font-size:14px;color:var(--mut);margin:4px 4px 8px;text-transform:uppercase;letter-spacing:.6px}
+.tk{display:block;width:100%;text-align:left;background:transparent;border:1px solid transparent;border-radius:8px;color:var(--txt);padding:7px 8px;margin-bottom:4px}
+.tk:hover{background:var(--panel2)}
+.tk.sel{border-color:var(--acc);background:#0c2a40}
+.tk .s{font-size:12px;color:var(--mut);display:block}
+.tk.urg{border-color:var(--bad);background:#3a0d0d}
+.locked{color:var(--mut);font-size:13px;padding:6px 8px}
+.ticket{padding:16px;min-height:300px}
+.tk-head{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.av{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:700;background:#1e3a5f;flex:none}
+.av.urg{background:var(--bad)}
+.q{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:10px 0}
+.q .qt{font-weight:600;margin-bottom:6px}
+.q label.opt{display:flex;gap:8px;align-items:flex-start;padding:4px 2px;cursor:pointer}
+.q input[type=number]{width:110px;background:#0a1322;border:1px solid var(--line);border-radius:6px;padding:5px 8px}
+.q select{background:#0a1322;border:1px solid var(--line);border-radius:6px;padding:5px;max-width:100%}
+.q .multi{display:flex;flex-wrap:wrap;gap:6px}
+.q .multi label{background:#0a1322;border:1px solid var(--line);border-radius:999px;padding:3px 10px;cursor:pointer}
+.q .item{margin:8px 0;padding-top:6px;border-top:1px dashed var(--line)}
+.res-ok{color:var(--ok)}.res-ko{color:var(--bad)}
+.fb{margin:10px 0}
+.fb.warn{background:#3a0d0d;border:1px solid #7f1d1d;border-radius:8px;padding:8px 12px}
+.learn{background:#0b2e1e;border:1px solid #166534;border-radius:8px;padding:10px 12px;margin-top:10px}
+.tbl{width:100%;border-collapse:collapse;margin:8px 0}
+.tbl td,.tbl th{border:1px solid var(--line);padding:5px 8px;text-align:left;vertical-align:top}
+.tbl th{background:var(--panel2)}
+.server{overflow:hidden;position:sticky;top:64px}
+.tabs{display:flex;gap:2px;background:#0a1120;padding:6px 6px 0;flex-wrap:wrap}
+.tabs button{background:#1a2438;color:var(--mut);border:0;border-radius:8px 8px 0 0;padding:7px 12px;font-size:13px}
+.tabs button.on{background:var(--ps);color:#fff}
+.tabs button.on.mm{background:#f0f0f0;color:#000}
+.tabs .run{margin-left:auto;background:#24324d;color:#fff;border-radius:8px;margin-bottom:6px}
+.pane{display:none;height:calc(100vh - 140px);min-height:460px}
+.pane.on{display:block}
+/* PowerShell */
+.ps{background:var(--ps);color:#eeedf0;height:100%;overflow:auto;padding:10px 12px;font:13.5px/1.35 Consolas,"Cascadia Mono",Menlo,monospace;cursor:text}
+#ps-out{white-space:pre-wrap;word-break:break-word;margin:0}
+.ps-line{display:flex;white-space:pre}
+.ps-line input{flex:1;background:transparent;border:0;outline:0;color:#fff;font:inherit;padding:0;min-width:40px}
+/* MMC (lusrmgr) */
+.mmc{background:#fff;color:#000;height:100%;display:flex;flex-direction:column;font:13px "Segoe UI",system-ui,sans-serif}
+.mmc-title{background:#fff;border-bottom:1px solid #ddd;padding:6px 10px;font-size:12px}
+.mmc-menu{background:#f5f5f5;border-bottom:1px solid #ddd;padding:3px 10px;font-size:12px;color:#333;word-spacing:12px}
+.mmc-body{flex:1;display:grid;grid-template-columns:170px 1fr 150px;min-height:0}
+.mmc-tree{border-right:1px solid #ddd;padding:6px;overflow:auto}
+.mmc-tree div{padding:2px 4px;cursor:pointer;border-radius:2px;white-space:nowrap}
+.mmc-tree div.sel{background:#cce8ff}
+.mmc-tree .ind{padding-left:18px}
+.mmc-list{overflow:auto}
+.mmc-list table{border-collapse:collapse;width:100%}
+.mmc-list th{font-weight:400;text-align:left;border-bottom:1px solid #ddd;border-right:1px solid #eee;padding:3px 6px;position:sticky;top:0;background:#fff}
+.mmc-list td{padding:2px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px;cursor:default}
+.mmc-list tr.sel td{background:#cce8ff}
+.mmc-list tr:hover td{background:#e5f3ff}
+.uic{position:relative;display:inline-block;width:18px}
+.uic .dn{position:absolute;left:8px;top:6px;font-size:9px;background:#fff;border:1px solid #444;border-radius:50%;width:11px;height:11px;line-height:9px;text-align:center;color:#000}
+.mmc-act{border-left:1px solid #ddd;background:#fafafa;overflow:auto}
+.mmc-act .h{background:#e8eef7;font-weight:600;padding:3px 8px;border-bottom:1px solid #ddd}
+.mmc-act button{display:block;width:100%;text-align:left;background:none;border:0;padding:3px 8px 3px 16px;font-size:12.5px;color:#000}
+.mmc-act button:hover{background:#e5f3ff}
+@media (max-width:700px){.mmc-body{grid-template-columns:1fr}.mmc-tree{display:flex;gap:6px}.mmc-tree .ind{padding-left:4px}}
+/* Windows dialogs */
+.ov{position:fixed;inset:0;background:#0006;display:grid;place-items:center;z-index:100;padding:10px}
+.dlg{background:#f0f0f0;color:#000;border:1px solid #888;box-shadow:0 10px 40px #0008;font:13px "Segoe UI",system-ui,sans-serif;max-height:94vh;display:flex;flex-direction:column}
+.dlg-t{background:#fff;display:flex;justify-content:space-between;align-items:center;padding:6px 6px 6px 10px}
+.dlg-x{background:none;border:0;font-size:14px;width:30px;height:24px}
+.dlg-x:hover{background:#e81123;color:#fff}
+.dlg-b{padding:12px 14px;overflow:auto}
+.dlg-f{display:flex;justify-content:flex-end;gap:6px;padding:8px 12px 12px}
+.wbtn{background:#e1e1e1;border:1px solid #adadad;padding:3px 14px;min-width:80px;color:#000}
+.wbtn:hover{background:#e5f1fb;border-color:#0078d7}
+.wbtn.primary{border:2px solid #0078d7}
+.dlg label.w{display:grid;grid-template-columns:150px 1fr;align-items:center;gap:6px;margin:6px 0}
+.dlg input[type=text],.dlg input[type=password],.dlg textarea{border:1px solid #7a7a7a;background:#fff;padding:3px 5px;color:#000;width:100%}
+.dlg label.chk{display:flex;gap:6px;align-items:flex-start;margin:5px 0}
+.dlg label.chk.dis{color:#888}
+.wtabs{display:flex;gap:0;border-bottom:1px solid #adadad;margin-bottom:8px}
+.wtabs button{background:#f0f0f0;border:1px solid #adadad;border-bottom:0;padding:3px 10px;margin-right:-1px;color:#000}
+.wtabs button.on{background:#fff;position:relative;top:1px}
+.wtabs button:disabled{color:#999}
+.wtab{display:none;background:#fff;border:1px solid #adadad;border-top:0;padding:10px;margin-top:-8px}
+.wtab.on{display:block}
+.wlist{width:100%;border:1px solid #7a7a7a;background:#fff;color:#000;min-height:130px}
+.msg{white-space:pre-wrap;max-width:460px;margin:4px 0}
+.row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.secpol td{border-bottom:1px solid #eee;padding:3px 8px}
+#toast{position:fixed;right:16px;bottom:16px;background:#7f1d1d;border:1px solid var(--bad);color:#fff;padding:10px 16px;border-radius:10px;display:none;z-index:200;box-shadow:0 6px 24px #0008}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:10px}
+footer button{background:none;border:0;color:var(--mut);text-decoration:underline}
+.grade{font-size:42px;font-weight:800;color:var(--acc)}
+@media print{#hdr,footer,.noprint{display:none!important}body{background:#fff;color:#000}.card{border:1px solid #999;background:#fff;color:#000;max-width:none}pre,code{background:#f4f4f4;color:#000}.tbl th{background:#eee}.muted{color:#444}}
+</style>
+</head>
+<body>
+<header id="hdr"></header>
+<main id="main"></main>
+<footer class="noprint">SurTech S.L. · Práctica global UD2 – Usuarios, grupos y perfiles · SOR 2.º SMR · <button data-act="reset">Reiniciar práctica</button></footer>
+<div id="toast"></div>
+<script>
+'use strict';
+/* ================= utilidades ================= */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=s=>String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+const skel=s=>norm(s).replace(/[^a-z0-9]/g,'');
+// tolera tildes rotas al copiar desde CMD (p. ej. "Mar¡a")
+const looseEq=(a,b)=>{const x=skel(a),y=skel(b);if(!y)return false;return x===y||(x.replace(/[aeiou]/g,'')===y.replace(/[aeiou]/g,'')&&Math.abs(x.length-y.length)<=3);};
+const cmp=(a,b)=>a.localeCompare(b,'es',{sensitivity:'base'});
+function fnv(str){let h=2166136261>>>0;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}return h;}
+function rng(seed){let a=seed>>>0;return()=>{a=a+0x6D2B79F5>>>0;let t=a;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};}
+function perm(n,seedStr){const r=rng(fnv(seedStr));const a=[...Array(n).keys()];for(let i=n-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const p2=n=>String(n).padStart(2,'0');
+const today=()=>{const d=new Date();return `${p2(d.getDate())}/${p2(d.getMonth()+1)}/${d.getFullYear()}`;};
+const now=()=>{const d=new Date();return `${today()} ${d.getHours()}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`;};
+const hhmm=()=>{const d=new Date();return `${p2(d.getHours())}:${p2(d.getMinutes())}`;};
+function addDays(s,n){const [dp,tp]=s.split(' ');const [d,m,y]=dp.split('/').map(Number);const x=new Date(y,m-1,d+n);return `${p2(x.getDate())}/${p2(x.getMonth()+1)}/${x.getFullYear()}${tp?' '+tp:''}`;}
+function toast(t){const el=$('#toast');el.textContent=t;el.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>el.style.display='none',4500);}
+
+/* ================= estado ================= */
+const KEY='surtech-ud2-v1', RKEY='surtech-ud2-resets';
+let P=null;
+const S=()=>P.server;
+function load(){try{const j=localStorage.getItem(KEY);if(j)P=JSON.parse(j);}catch(e){P=null;}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(P));}catch(e){}}
+function logEv(s){P.log.push(`[${hhmm()}] ${s}`);if(P.log.length>600)P.log.shift();}
+
+const NOMBRES=['Lucía','Javier','Irene','Sergio','Nerea','Adrián','Paula','Hugo','Carla','Iker','Marta','Raúl','Sara','Diego','Elena','Óscar'];
+const APELLIDOS=['Fernández','Navarro','Domínguez','Ortega','Castillo','Romero','Herrera','Molina','Delgado','Suárez','Iglesias','Peña','Cortés','Benítez','Vázquez','Serrano'];
+function makeHire(seed){const h=fnv(seed+'#hire');const first=NOMBRES[h%16],a1=APELLIDOS[(h>>>4)%16];let a2=APELLIDOS[(h>>>8)%16];if(a2===a1)a2=APELLIDOS[((h>>>8)+5)%16];
+  return {first,a1,full:`${first} ${a1} ${a2}`,user:(norm(first)[0]+norm(a1)).replace(/[^a-z]/g,'')};}
+
+const DOM='S-1-5-21-2148331079-3982102364-1150287519-';
+function initialServer(){
+  const SV={users:{},groups:{},next:1010};
+  const u=(rid,name,full,comment,o={})=>{const sid=DOM+rid;SV.users[sid]=Object.assign({sid,name,full,comment,active:true,mustChange:false,cannotChange:false,neverExpires:false,builtin:false,pwd:'x',pwdSet:'03/11/2026 9:14:02',resets:0},o);return sid;};
+  const g=(sid,name,comment,members,builtin=false)=>{SV.groups[sid]={sid,name,comment,members,builtin};};
+  const adm=u(500,'Administrador','','Cuenta integrada para la administración del equipo o dominio',{builtin:true,pwdSet:'01/10/2026 18:02:11',lastLogon:today()+' 8:01:13'});
+  const inv=u(501,'Invitado','','Cuenta integrada para el acceso como invitado al equipo o dominio',{builtin:true,active:false});
+  u(503,'DefaultAccount','','Cuenta de usuario administrada por el sistema.',{builtin:true,active:false});
+  u(504,'WDAGUtilityAccount','','Cuenta de usuario que el sistema administra y usa para escenarios de Protección de aplicaciones de Windows Defender.',{builtin:true,active:false});
+  const mg=u(1000,'mgarcia','María García','Contabilidad',{mustChange:true});
+  const pl=u(1001,'plopez','Pedro López','Ventas',{neverExpires:true});
+  const ar=u(1002,'aruiz','Ana Ruiz','Contabilidad',{active:false});
+  const rm=u(1003,'rmoreno','Ramón Moreno','Técnico informático',{pwdSet:'02/09/2026 10:40:55',lastLogon:'17/10/2026 19:22:40'});
+  const co=u(1004,'comercial','Comercial','Cuenta compartida por todo Ventas. Contraseña en pósit del monitor',{neverExpires:true});
+  const pr=u(1005,'prueba01','Prueba','Cuenta de pruebas de Ramón - borrar');
+  g('S-1-5-32-544','Administradores','Los administradores tienen acceso completo y sin restricciones al equipo o dominio',[adm,rm,pl],true);
+  g('S-1-5-32-545','Usuarios','Los usuarios no pueden hacer cambios accidentales o intencionados en el sistema y pueden ejecutar la mayoría de aplicaciones',[mg,pl,ar,rm,co,pr],true);
+  g('S-1-5-32-546','Invitados','Los invitados tienen, de manera predeterminada, el mismo acceso que los miembros del grupo Usuarios',[inv],true);
+  g('S-1-5-32-551','Operadores de copia de seguridad','Pueden invalidar restricciones de seguridad con el único propósito de hacer copias de seguridad o restaurar archivos',[],true);
+  g('S-1-5-32-555','Usuarios de escritorio remoto','A los miembros de este grupo se les concede el derecho de iniciar sesión remotamente',[],true);
+  g(DOM+1006,'Ventas','Trabajadores de Ventas',[pl,co]);
+  g(DOM+1007,'Contabilidad','Trabajadores de Contabilidad',[mg,ar]);
+  g(DOM+1008,'Administracion','Trabajadores de Administración',[]);
+  g(DOM+1009,'GrupoPrueba','Grupo de pruebas de Ramón - borrar',[pr]);
+  return SV;
+}
+function newProgress(st){
+  const seed=norm(st.nombre+' '+st.apellidos);
+  const hire=makeHire(seed);
+  return {v:1,student:st,seed,hire,screen:1,maxPhase:1,lab1:null,real:null,tickets:{},urgent:[],penalties:[],log:[],
+    server:initialServer(),employeeNames:['mgarcia','plopez','aruiz',hire.user],
+    orig:{rmoreno:DOM+1003,comercial:DOM+1004},view:null,termBuf:'',started:now()};
+}
+
+/* ================= modelo del servidor ================= */
+const strip=n=>String(n??'').replace(/^.*\\/,'').trim();
+const userBy=n=>Object.values(S().users).find(x=>x.name.toLowerCase()===strip(n).toLowerCase());
+const groupBy=n=>Object.values(S().groups).find(x=>x.name.toLowerCase()===strip(n).toLowerCase());
+const inGroup=(gn,un)=>{const g=groupBy(gn),u=userBy(un);return !!(g&&u&&g.members.includes(u.sid));};
+const groupsOf=sid=>Object.values(S().groups).filter(g=>g.members.includes(sid)).sort((a,b)=>cmp(a.name,b.name));
+const membersNames=gn=>{const g=groupBy(gn);return g?g.members.map(s=>S().users[s]?.name).filter(Boolean):[];};
+const allUserNames=()=>Object.values(S().users).map(u=>u.name).sort(cmp);
+
+const E={
+  ok:'Se ha completado el comando correctamente.',
+  noUser:'No se encuentra el nombre de usuario.\n\nPuede obtener más ayuda con NET HELPMSG 2221.',
+  userExists:'La cuenta ya existe.\n\nPuede obtener más ayuda con NET HELPMSG 2224.',
+  pwd:'La contraseña no cumple los requisitos de la directiva de contraseñas. Compruebe los requisitos de longitud mínima, complejidad e historial de contraseñas.\n\nPuede obtener más ayuda con NET HELPMSG 2245.',
+  noGroup:'Error de sistema 1376.\n\nEl grupo local especificado no existe.',
+  groupExists:'Error de sistema 1379.\n\nEl grupo local especificado ya existe.',
+  already:'Error de sistema 1378.\n\nEl nombre de cuenta especificado ya es miembro del grupo.',
+  notMember:'Error de sistema 1377.\n\nEl miembro especificado no pertenece al grupo local.',
+  noMap:'Error de sistema 1332.\n\nNo se ha efectuado ninguna asignación entre los nombres de cuenta y los identificadores de seguridad.',
+  builtin:'No se puede realizar esta operación en cuentas o grupos integrados del sistema.',
+  badName:'El nombre de usuario o de grupo no es válido.',
+  mismatch:'Las contraseñas no coinciden.',
+};
+const cleanErr=e=>e.replace(/\n\nPuede obtener más ayuda.*$/s,'').replace(/^Error de sistema \d+\.\n\n/,'');
+const BAD_NAME=/["\/\\\[\]:;|=,+*?<>@]/;
+function pwdOk(pwd,u){
+  if(!pwd||pwd.length<7)return false;
+  let c=0;if(/[A-Z]/.test(pwd))c++;if(/[a-z]/.test(pwd))c++;if(/[0-9]/.test(pwd))c++;if(/[^A-Za-z0-9]/.test(pwd))c++;
+  if(c<3)return false;
+  const low=pwd.toLowerCase();
+  if(u.name.length>=3&&low.includes(u.name.toLowerCase()))return false;
+  for(const part of (u.full||'').split(/[\s,.\-_#]+/))if(part.length>=3&&low.includes(part.toLowerCase()))return false;
+  return true;
+}
+function validName(n){return !!n&&n.length<=20&&!BAD_NAME.test(n)&&!/^[.\s]+$/.test(n);}
+function opCreateUser(name,pwd,o={}){
+  name=String(name||'').trim();
+  if(!validName(name))return E.badName;
+  if(userBy(name)||groupBy(name))return E.userExists;
+  const u={sid:DOM+S().next,name,full:o.full||'',comment:o.comment||'',active:!o.disabled,mustChange:!!o.mustChange,cannotChange:!!o.cannotChange,neverExpires:!!o.neverExpires,builtin:false,pwd:'x',pwdSet:now(),resets:0};
+  if(!pwdOk(pwd,u))return E.pwd;
+  S().next++;S().users[u.sid]=u;groupBy('Usuarios')?.members.push(u.sid);
+  return null;
+}
+function opDeleteUser(u){
+  if(u.builtin)return E.builtin;
+  for(const g of Object.values(S().groups))g.members=g.members.filter(x=>x!==u.sid);
+  delete S().users[u.sid];
+  const isHire=u.name.toLowerCase()===P.hire.user;
+  if(P.employeeNames.includes(u.name.toLowerCase())&&!(isHire&&!P.tickets.T5?.done)){
+    P.penalties.push({pts:5,why:`Eliminaste la cuenta del trabajador ${u.name}`});
+    P.urgent.push({id:'URG'+(P.urgent.length+1),name:u.name,full:u.full||u.name});
+    setTimeout(()=>toast('📨 ¡Ha entrado un ticket URGENTE en la bandeja!'),50);
+  }
+  return null;
+}
+function opSetPassword(u,pwd){if(!pwdOk(pwd,u))return E.pwd;u.pwdSet=now();u.resets++;return null;}
+function opRenameUser(u,n){n=String(n||'').trim();if(!validName(n))return E.badName;const o=userBy(n)||groupBy(n);if(o&&o!==u)return E.userExists;u.name=n;return null;}
+function opCreateGroup(name,comment){name=String(name||'').trim();if(!name||name.length>256||BAD_NAME.test(name))return E.badName;if(groupBy(name)||userBy(name))return E.groupExists;
+  const sid=DOM+(S().next++);S().groups[sid]={sid,name,comment:comment||'',members:[],builtin:false};return null;}
+function opDeleteGroup(g){if(g.builtin)return E.builtin;delete S().groups[g.sid];return null;}
+function opRenameGroup(g,n){n=String(n||'').trim();if(!n||BAD_NAME.test(n))return E.badName;const o=groupBy(n)||userBy(n);if(o&&o!==g)return E.groupExists;g.name=n;return null;}
+function opAddMember(g,u){if(g.members.includes(u.sid))return E.already;g.members.push(u.sid);return null;}
+function opRemoveMember(g,u){if(!g.members.includes(u.sid))return E.notMember;g.members=g.members.filter(x=>x!==u.sid);return null;}
+// el ticket solo se repinta si cambia (p. ej. entra un urgente) para no borrar respuestas a medio contestar
+function afterChange(){save();renderMMC();if(P.screen===2){renderInbox();if(!P.view&&currentId()!==shownId)renderTicket();}renderHeader();}
+let shownId=null;
+
+/* ================= consola (net / PowerShell) ================= */
+const DASH='-'.repeat(79);
+const PROMPT='PS C:\\Users\\Administrador> ';
+function tokenize(s){const out=[];let cur='',q=false,has=false;for(const ch of s){if(ch==='"'){q=!q;has=true;continue;}if(!q&&/\s/.test(ch)){if(has){out.push(cur);cur='';has=false;}continue;}cur+=ch;has=true;}if(has)out.push(cur);return out;}
+function switches(a){const sw={},pos=[];for(const x of a){if(x.startsWith('/')){const i=x.indexOf(':');sw[(i<0?x:x.slice(0,i)).toLowerCase()]=i<0?true:x.slice(i+1);}else pos.push(x);}return {sw,pos};}
+function yn(v){if(v===undefined)return undefined;if(v===true)return true;const s=norm(v);if(s==='yes'||s==='si')return true;if(s==='no')return false;return 'bad';}
+const SYN_USER='La sintaxis de este comando es:\n\nNET USER\n[nombre_usuario [contraseña | *] [opciones]]\n        nombre_usuario {contraseña | *} /ADD [opciones]\n        nombre_usuario [/DELETE]\n\nOpciones: /ACTIVE:{YES|NO}  /COMMENT:"texto"  /FULLNAME:"nombre"\n          /PASSWORDCHG:{YES|NO}  /LOGONPASSWORDCHG:{YES|NO}';
+const SYN_LG='La sintaxis de este comando es:\n\nNET LOCALGROUP\n[nombre_grupo [/COMMENT:"texto"]]\n               nombre_grupo {/ADD [/COMMENT:"texto"] | /DELETE}\n               nombre_grupo nombre [...] {/ADD | /DELETE}';
+function listUsers(){const n=allUserNames();const rows=[];for(let i=0;i<n.length;i+=3)rows.push(n.slice(i,i+3).map(x=>x.padEnd(25)).join('').trimEnd());return ['','Cuentas de usuario de \\\\SRV01','',DASH,...rows,E.ok].join('\n');}
+function listGroups(){return ['','Alias para \\\\SRV01','',DASH,...Object.values(S().groups).map(g=>'*'+g.name).sort(cmp),E.ok].join('\n');}
+function showGroup(g){const m=g.members.map(s=>S().users[s]?.name).filter(Boolean).sort(cmp);return ['Nombre de alias'.padEnd(20)+g.name,'Comentario'.padEnd(20)+g.comment,'','Miembros','',DASH,...m,E.ok].join('\n');}
+function showUser(u){
+  const L=(k,v='')=>(k.padEnd(43)+v).trimEnd();
+  const gl=groupsOf(u.sid).map(g=>'*'+g.name);const gs=[];for(let i=0;i<gl.length;i+=2)gs.push(gl.slice(i,i+2).map(s=>s.padEnd(22)).join('').trimEnd());
+  return [L('Nombre de usuario',u.name),L('Nombre completo',u.full),L('Comentario',u.comment),L('Comentario del usuario'),L('Código de país o región','000 (Predeterminado por el sistema)'),
+    L('Cuenta activa',u.active?'Sí':'No'),L('La cuenta expira','Nunca'),'',L('Último cambio de contraseña',u.pwdSet),L('La contraseña expira',u.neverExpires?'Nunca':addDays(u.pwdSet,42)),
+    L('Cambio de contraseña',addDays(u.pwdSet,1)),L('Contraseña requerida','Sí'),L('El usuario puede cambiar la contraseña',u.cannotChange?'No':'Sí'),'',
+    L('Estaciones de trabajo autorizadas','Todas'),L('Script de inicio de sesión'),L('Perfil de usuario'),L('Directorio principal'),L('Última sesión iniciada',u.lastLogon||'Nunca'),'',
+    L('Horas de inicio de sesión autorizadas','Todas'),'',L('Miembros del grupo local',gs[0]||''),...gs.slice(1).map(x=>' '.repeat(43)+x),L('Miembros del grupo global','*Ninguno'),E.ok].join('\n');
+}
+function applyUserSwitches(u,sw){
+  const a=yn(sw['/active']),pc=yn(sw['/passwordchg']),lp=yn(sw['/logonpasswordchg']);
+  if([a,pc,lp].includes('bad'))return SYN_USER;
+  if(a!==undefined)u.active=a;
+  if(pc!==undefined)u.cannotChange=!pc;
+  if(lp!==undefined)u.mustChange=lp;
+  if(sw['/fullname']!==undefined)u.full=sw['/fullname']===true?'':sw['/fullname'];
+  if(sw['/comment']!==undefined)u.comment=sw['/comment']===true?'':sw['/comment'];
+  return null;
+}
+const USER_SW=['/add','/delete','/del','/active','/fullname','/comment','/passwordchg','/logonpasswordchg'];
+function netUser(a){
+  const {sw,pos}=switches(a);
+  if(Object.keys(sw).some(k=>!USER_SW.includes(k)))return SYN_USER;
+  if(!pos.length)return Object.keys(sw).length?SYN_USER:listUsers();
+  const name=pos[0];
+  if(sw['/add']){
+    if(pos.length>2)return SYN_USER;
+    const o={full:sw['/fullname']===true?'':sw['/fullname'],comment:sw['/comment']===true?'':sw['/comment'],disabled:yn(sw['/active'])===false,cannotChange:yn(sw['/passwordchg'])===false,mustChange:yn(sw['/logonpasswordchg'])===true};
+    if(pos[1]==='*'){if(userBy(name)||groupBy(name))return E.userExists;askPassword(pw=>opCreateUser(name,pw,o)||(afterChange(),E.ok));return null;}
+    const err=opCreateUser(name,pos[1]||'',o);if(err)return err;afterChange();return E.ok;
+  }
+  const u=userBy(name);
+  if(sw['/delete']||sw['/del']){if(!u)return E.noUser;const err=opDeleteUser(u);if(err)return err;afterChange();return E.ok;}
+  if(!u)return E.noUser;
+  if(pos.length>2)return SYN_USER;
+  if(pos[1]==='*'){askPassword(pw=>{const e=opSetPassword(u,pw);if(e)return e;const e2=applyUserSwitches(u,sw);afterChange();return e2||E.ok;});return null;}
+  if(pos[1]){const e=opSetPassword(u,pos[1]);if(e)return e;}
+  if(!pos[1]&&!Object.keys(sw).length)return showUser(u);
+  const e2=applyUserSwitches(u,sw);if(e2)return e2;afterChange();return E.ok;
+}
+function netLocalgroup(a){
+  const {sw,pos}=switches(a);
+  if(Object.keys(sw).some(k=>!['/add','/delete','/del','/comment'].includes(k)))return SYN_LG;
+  if(!pos.length)return Object.keys(sw).length?SYN_LG:listGroups();
+  const g=groupBy(pos[0]);const del=sw['/delete']||sw['/del'];
+  if(pos.length===1){
+    if(sw['/add']){const e=opCreateGroup(pos[0],sw['/comment']===true?'':sw['/comment']);if(e)return e;afterChange();return E.ok;}
+    if(!g)return E.noGroup;
+    if(del){const e=opDeleteGroup(g);if(e)return e;afterChange();return E.ok;}
+    if(sw['/comment']!==undefined){g.comment=sw['/comment']===true?'':sw['/comment'];afterChange();return E.ok;}
+    return showGroup(g);
+  }
+  if(!g)return E.noGroup;
+  if(!sw['/add']&&!del)return SYN_LG;
+  const us=[];
+  for(const n of pos.slice(1)){const u=userBy(n);if(!u)return E.noMap;if(sw['/add']&&g.members.includes(u.sid))return E.already;if(del&&!g.members.includes(u.sid))return E.notMember;us.push(u);}
+  for(const u of us)sw['/add']?opAddMember(g,u):opRemoveMember(g,u);
+  afterChange();return E.ok;
+}
+function psParams(t){const o={_:[]};for(let i=0;i<t.length;i++){if(/^-[a-z]+$/i.test(t[i])){o[t[i].slice(1).toLowerCase()]=t[i+1];i++;}else o._.push(t[i]);}return o;}
+const psNotFound=(kind,n,cmd)=>`${cmd} : No se encontró ${kind} ${n}.\n    + CategoryInfo          : ObjectNotFound: (${n}:String) [${cmd}], ${kind==='el usuario'?'UserNotFoundException':'GroupNotFoundException'}`;
+function psUserTable(us){return ['','Name'.padEnd(19)+'Enabled'.padEnd(8)+'Description','----'.padEnd(19)+'-------'.padEnd(8)+'-----------',...us.map(u=>(u.name.padEnd(18)+' '+(u.active?'True':'False').padEnd(8)+u.comment).trimEnd()),''].join('\n');}
+function psGroupTable(gs){return ['','Name'.padEnd(33)+'Description','----'.padEnd(33)+'-----------',...gs.map(g=>(g.name.padEnd(32)+' '+g.comment).trimEnd()),''].join('\n');}
+const HELP=`Comandos disponibles en este simulador de SRV01:
+
+  net user                         net localgroup
+  net user nombre                  net localgroup grupo
+  net user nombre * | contraseña   net localgroup grupo /add [/comment:"texto"]
+  net user nombre ... /add         net localgroup grupo /delete
+  net user nombre /delete          net localgroup grupo usuario /add
+  net user nombre /active:yes|no   net localgroup grupo usuario /delete
+  net user nombre /fullname:"..." /comment:"..." /logonpasswordchg:yes|no /passwordchg:yes|no
+
+  Get-LocalUser [-Name n]   Get-LocalGroup [-Name n]   New-LocalGroup -Name n -Description d
+  Get-LocalGroupMember -Group g    Enable-LocalUser -Name n    Disable-LocalUser -Name n
+
+  lusrmgr.msc   secpol.msc   hostname   whoami   ipconfig   cls   help`;
+function runLine(line){
+  line=line.replace(/\|.*$/,'').trim();
+  const t=tokenize(line);if(!t.length)return '';
+  const c=t[0].toLowerCase();
+  switch(c){
+    case 'net':case 'net.exe':{const s=(t[1]||'').toLowerCase();
+      if(s==='user'||s==='users')return netUser(t.slice(2));
+      if(s==='localgroup')return netLocalgroup(t.slice(2));
+      if(!s)return 'La sintaxis de este comando es:\n\nNET\n    [ ACCOUNTS | COMPUTER | CONFIG | CONTINUE | FILE | GROUP | HELP |\n      HELPMSG | LOCALGROUP | PAUSE | SESSION | SHARE | START |\n      STATISTICS | STOP | TIME | USE | USER | VIEW ]';
+      return 'En este simulador solo están disponibles NET USER y NET LOCALGROUP.';}
+    case 'cls':case 'clear':case 'clear-host':P.termBuf='';$('#ps-out').textContent='';return null;
+    case 'help':case 'ayuda':case '?':return HELP;
+    case 'hostname':return 'SRV01';
+    case 'whoami':return 'srv01\\administrador';
+    case 'ipconfig':return '\nConfiguración IP de Windows\n\nAdaptador de Ethernet Ethernet:\n\n   Dirección IPv4. . . . . . . . . . . . . . : 192.168.15.10\n   Máscara de subred . . . . . . . . . . . . : 255.255.255.0\n   Puerta de enlace predeterminada . . . . . : 192.168.15.1';
+    case 'lusrmgr':case 'lusrmgr.msc':case 'compmgmt.msc':showTab('mmc');return '';
+    case 'secpol':case 'secpol.msc':dlgSecpol();return '';
+    case 'cmd':case 'cmd.exe':case 'powershell':return 'Ya estás en una consola de administrador. Los comandos net funcionan igual en CMD y en PowerShell.';
+    case 'exit':return 'En el simulador la consola no se puede cerrar 😉';
+    case 'get-localuser':{const o=psParams(t.slice(1)),n=o.name||o._[0];if(n){const u=userBy(n);return u?psUserTable([u]):psNotFound('el usuario',n,'Get-LocalUser');}return psUserTable(Object.values(S().users).sort((a,b)=>cmp(a.name,b.name)));}
+    case 'get-localgroup':{const o=psParams(t.slice(1)),n=o.name||o._[0];if(n){const g=groupBy(n);return g?psGroupTable([g]):psNotFound('el grupo',n,'Get-LocalGroup');}return psGroupTable(Object.values(S().groups).sort((a,b)=>cmp(a.name,b.name)));}
+    case 'new-localgroup':{const o=psParams(t.slice(1)),n=o.name||o._[0];if(!n)return 'New-LocalGroup : Falta el parámetro -Name.';const e=opCreateGroup(n,o.description||'');if(e)return e===E.groupExists?`New-LocalGroup : El grupo ${n} ya existe.`:'New-LocalGroup : '+cleanErr(e);afterChange();return psGroupTable([groupBy(n)]);}
+    case 'get-localgroupmember':{const o=psParams(t.slice(1)),n=o.group||o.name||o._[0];const g=n&&groupBy(n);if(!g)return psNotFound('el grupo',n||'','Get-LocalGroupMember');
+      return ['','ObjectClass Name'.padEnd(40)+'PrincipalSource','----------- ----'.padEnd(40)+'---------------',...g.members.map(s=>S().users[s]).filter(Boolean).map(u=>('Usuario     SRV01\\'+u.name).padEnd(40)+'Local'),''].join('\n');}
+    case 'enable-localuser':case 'disable-localuser':{const o=psParams(t.slice(1)),n=o.name||o._[0];const u=n&&userBy(n);if(!u)return psNotFound('el usuario',n||'',t[0]);u.active=c==='enable-localuser';afterChange();return '';}
+  }
+  if(/^[a-z]+-local/i.test(c))return `${t[0]} : este cmdlet no está disponible en el simulador. Usa los comandos vistos en clase (net user, net localgroup, Get-LocalUser…).`;
+  return `${t[0]} : El término '${t[0]}' no se reconoce como nombre de un cmdlet, función, archivo de script o programa ejecutable. Compruebe si escribió correctamente el nombre o, si incluyó una ruta de acceso, compruebe que dicha ruta es correcta e inténtelo de nuevo.`;
+}
+const term={hist:[],hi:0,pending:null};
+function askPassword(cb){term.pending={step:1,first:'',cb};termPrint('Escriba una contraseña para el usuario:');setPwMode(true);}
+function setPwMode(on){const i=$('#ps-in');if(!i)return;i.type=on?'password':'text';$('#ps-prompt').textContent=on?'':PROMPT;}
+function termPrint(s){P.termBuf=(P.termBuf+s);if(P.termBuf.length>40000)P.termBuf=P.termBuf.slice(-40000);const o=$('#ps-out');if(o){o.textContent=P.termBuf;const ps=$('#ps');ps.scrollTop=ps.scrollHeight;}}
+function termEnter(v){
+  if(term.pending){const p=term.pending;
+    if(p.step===1){p.first=v;p.step=2;termPrint('\nVuelva a escribir la contraseña para confirmar:');return;}
+    term.pending=null;setPwMode(false);
+    const out=v!==p.first?E.mismatch:p.cb(v);
+    termPrint('\n'+out+'\n\n');save();return;}
+  termPrint(PROMPT+v+'\n');
+  if(v.trim()){term.hist.push(v);term.hi=term.hist.length;logEv('PS> '+v);}
+  let out;try{out=runLine(v);}catch(e){out='Error inesperado del simulador: '+e.message;}
+  if(out===null){save();return;}
+  if(out)termPrint(out.replace(/\n+$/,'')+'\n\n');
+  save();
+}
+function termInit(){
+  if(!P.termBuf)P.termBuf='Windows PowerShell\nCopyright (C) Microsoft Corporation. Todos los derechos reservados.\n\nSimulador de SRV01 (Windows Server 2025). Escribe help para ver los comandos disponibles.\n\n';
+  $('#ps-out').textContent=P.termBuf;$('#ps-prompt').textContent=PROMPT;
+  const inp=$('#ps-in');
+  inp.onkeydown=e=>{
+    if(e.key==='Enter'){const v=inp.value;inp.value='';termEnter(v);}
+    else if(e.key==='ArrowUp'&&!term.pending){if(term.hi>0){term.hi--;inp.value=term.hist[term.hi];}e.preventDefault();}
+    else if(e.key==='ArrowDown'&&!term.pending){if(term.hi<term.hist.length-1){term.hi++;inp.value=term.hist[term.hi];}else{term.hi=term.hist.length;inp.value='';}e.preventDefault();}
+  };
+  $('#ps').onclick=()=>{if(!String(getSelection()))inp.focus();};
+  const ps=$('#ps');ps.scrollTop=ps.scrollHeight;
+}
+
+/* ================= diálogos estilo Windows ================= */
+function dialog(title,html,buttons,width=430){
+  const ov=document.createElement('div');ov.className='ov';
+  ov.innerHTML=`<div class="dlg" role="dialog" aria-modal="true" aria-label="${esc(title)}" style="width:min(${width}px,96vw)"><div class="dlg-t"><span>${esc(title)}</span><button class="dlg-x" aria-label="Cerrar">✕</button></div><div class="dlg-b">${html}</div><div class="dlg-f"></div></div>`;
+  const f=ov.querySelector('.dlg-f');const close=()=>ov.remove();
+  for(const b of buttons){const btn=document.createElement('button');btn.textContent=b.label;btn.className='wbtn'+(b.primary?' primary':'');
+    btn.onclick=()=>{if(!b.onClick||b.onClick(ov)!==false)close();};f.appendChild(btn);}
+  ov.querySelector('.dlg-x').onclick=()=>{const c=buttons.find(b=>b.cancel);if(c&&c.onClick)c.onClick(ov);close();};
+  ov.addEventListener('keydown',e=>{if(e.key==='Escape')ov.querySelector('.dlg-x').click();else if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();ov.querySelector('.wbtn.primary')?.click();}});
+  document.body.appendChild(ov);
+  const first=ov.querySelector('input[type=text],input[type=password],textarea')||ov.querySelector('.wbtn.primary');first&&first.focus();
+  return ov;
+}
+function msgbox(text,title='Usuarios y grupos locales'){dialog(title,`<p class="msg">${esc(text)}</p>`,[{label:'Aceptar',primary:true}]);}
+function confirmBox(text,title,yes){dialog(title,`<p class="msg">${esc(text)}</p>`,[{label:'Sí',primary:true,onClick:()=>{yes();}},{label:'No',cancel:true}]);}
+
+/* ================= lusrmgr.msc simulado ================= */
+const gui={view:'users',sel:null};
+function renderMMC(){
+  const el=$('#mmc');if(!el)return;
+  const users=gui.view==='users';
+  const rows=users?Object.values(S().users).sort((a,b)=>cmp(a.name,b.name)):Object.values(S().groups).sort((a,b)=>cmp(a.name,b.name));
+  if(gui.sel&&!(S().users[gui.sel]||S().groups[gui.sel]))gui.sel=null;
+  const sel=gui.sel&&(S().users[gui.sel]||S().groups[gui.sel]);
+  el.innerHTML=`<div class="mmc-title">lusrmgr - [Usuarios y grupos locales (local)\\${users?'Usuarios':'Grupos'}]</div>
+  <div class="mmc-menu">Archivo Acción Ver Ayuda</div>
+  <div class="mmc-body">
+   <div class="mmc-tree"><div>🖥️ Usuarios y grupos locales (local)</div>
+     <div class="ind ${users?'sel':''}" data-act="mmc-view" data-v="users">📁 Usuarios</div>
+     <div class="ind ${!users?'sel':''}" data-act="mmc-view" data-v="groups">📁 Grupos</div></div>
+   <div class="mmc-list"><table><thead><tr><th>Nombre</th>${users?'<th>Nombre completo</th>':''}<th>Descripción</th></tr></thead><tbody>
+   ${rows.map(r=>`<tr data-act="mmc-sel" data-sid="${r.sid}" class="${r.sid===gui.sel?'sel':''}" title="Doble clic: propiedades"><td>${users?`<span class="uic">👤${r.active?'':'<span class="dn" title="Deshabilitada">↓</span>'}</span>`:'<span class="uic">👥</span>'} ${esc(r.name)}</td>${users?`<td>${esc(r.full)}</td>`:''}<td title="${esc(r.comment)}">${esc(r.comment)}</td></tr>`).join('')}
+   </tbody></table></div>
+   <div class="mmc-act"><div class="h">${users?'Usuarios':'Grupos'}</div>
+     <button data-act="${users?'mmc-newuser':'mmc-newgroup'}">${users?'Usuario nuevo...':'Grupo nuevo...'}</button>
+     <button data-act="mmc-refresh">Actualizar</button>
+     ${sel?`<div class="h">${esc(sel.name)}</div>
+       ${users?'<button data-act="mmc-setpw">Establecer contraseña...</button>':'<button data-act="mmc-props">Agregar al grupo...</button>'}
+       <button data-act="mmc-del">Eliminar</button><button data-act="mmc-ren">Cambiar nombre</button><button data-act="mmc-props">Propiedades</button>`:''}
+   </div>
+  </div>`;
+}
+function namesListHtml(sids,isUser){return sids.map(s=>{const o=isUser?S().users[s]:S().groups[s];return o?`<option value="${s}">${isUser?'👤':'👥'} ${esc(o.name)}</option>`:'';}).join('');}
+function dlgSelect(kind,onOk){
+  const isUser=kind==='usuarios';
+  const d=dialog(`Seleccionar ${isUser?'Usuarios':'Grupos'}`,`
+   <label class="w">Seleccionar este tipo de objeto:<input type="text" value="${isUser?'Usuarios o entidades de seguridad integradas':'Grupos'}" disabled></label>
+   <label class="w">Desde esta ubicación:<input type="text" value="SRV01" disabled></label>
+   <div>Escriba los nombres de objeto que desea seleccionar (<u>ejemplos</u>):</div>
+   <div class="row"><textarea id="sel-in" rows="3" style="flex:1"></textarea><button class="wbtn" id="sel-chk" style="align-self:flex-start">Comprobar nombres</button></div>`,
+   [{label:'Aceptar',primary:true,onClick:dd=>{const r=resolve();if(!r)return false;onOk(r);}},{label:'Cancelar',cancel:true}],520);
+  const find=n=>isUser?userBy(n):groupBy(n);
+  function resolve(){
+    const names=$('#sel-in',d).value.split(/[;\n]/).map(s=>s.trim()).filter(Boolean);
+    if(!names.length){msgbox('Escriba al menos un nombre de objeto.','Seleccionar');return null;}
+    const out=[];for(const n of names){const o=find(n);if(!o){msgbox(`No se encontró ningún objeto (${isUser?'usuario':'grupo'}) con el nombre "${strip(n)}".\n\nCompruebe que el nombre está bien escrito.`,'Nombre no encontrado');return null;}out.push(o);}
+    $('#sel-in',d).value=out.map(o=>'SRV01\\'+o.name).join('; ');return out;
+  }
+  $('#sel-chk',d).onclick=()=>resolve();
+}
+function fillList(sel,sids,isUser){sel.innerHTML=namesListHtml([...sids].sort((a,b)=>{const A=isUser?S().users[a]:S().groups[a],B=isUser?S().users[b]:S().groups[b];return cmp(A?.name||'',B?.name||'');}),isUser);}
+function mustWire(d,pre,newUser){
+  const must=$(`#${pre}-must`,d),cant=$(`#${pre}-cant`,d),never=$(`#${pre}-never`,d);
+  const grey=()=>{if(!newUser)return;for(const c of [cant,never]){c.disabled=must.checked;if(must.checked)c.checked=false;c.parentElement.classList.toggle('dis',must.checked);}};
+  must.onchange=()=>{if(!newUser&&must.checked&&never.checked){never.checked=false;msgbox('Ha seleccionado «El usuario debe cambiar la contraseña en el siguiente inicio de sesión». La opción «La contraseña nunca expira» se ha desactivado.');}grey();};
+  never.onchange=()=>{if(never.checked&&must.checked){must.checked=false;msgbox('Ha seleccionado «La contraseña nunca expira». El usuario no tendrá que cambiar la contraseña en el siguiente inicio de sesión.');}};
+  grey();
+}
+const chk=(id,label,on)=>`<label class="chk"><input type="checkbox" id="${id}" ${on?'checked':''}> ${label}</label>`;
+function dlgNewUser(){
+  const d=dialog('Usuario nuevo',`
+   <label class="w">Nombre de usuario:<input type="text" id="nu-name" maxlength="20" autocomplete="off"></label>
+   <label class="w">Nombre completo:<input type="text" id="nu-full" autocomplete="off"></label>
+   <label class="w">Descripción:<input type="text" id="nu-desc" autocomplete="off"></label><hr>
+   <label class="w">Contraseña:<input type="password" id="nu-p1" autocomplete="new-password"></label>
+   <label class="w">Confirmar contraseña:<input type="password" id="nu-p2" autocomplete="new-password"></label>
+   ${chk('nu-must','El usuario debe cambiar la contraseña en el siguiente inicio de sesión',true)}
+   ${chk('nu-cant','El usuario no puede cambiar la contraseña',false)}
+   ${chk('nu-never','La contraseña nunca expira',false)}
+   ${chk('nu-dis','La cuenta está deshabilitada',false)}`,
+   [{label:'Crear',primary:true,onClick:dd=>{
+      const v=id=>$('#'+id,dd);const name=v('nu-name').value.trim();
+      if(!name){msgbox('Escriba un nombre de usuario.');return false;}
+      if(v('nu-p1').value!==v('nu-p2').value){msgbox('Las contraseñas escritas no coinciden.');return false;}
+      const e=opCreateUser(name,v('nu-p1').value,{full:v('nu-full').value.trim(),comment:v('nu-desc').value.trim(),mustChange:v('nu-must').checked,cannotChange:v('nu-cant').checked,neverExpires:v('nu-never').checked,disabled:v('nu-dis').checked});
+      if(e){msgbox(`Se produjo el siguiente error al intentar crear el usuario ${name}:\n\n${cleanErr(e)}`);return false;}
+      logEv(`GUI: Usuario nuevo ${name}`);
+      for(const id of ['nu-name','nu-full','nu-desc','nu-p1','nu-p2'])v(id).value='';
+      v('nu-must').checked=true;v('nu-dis').checked=false;v('nu-must').onchange();v('nu-name').focus();
+      afterChange();return false;}},{label:'Cerrar'}],460);
+  mustWire(d,'nu',true);
+}
+function dlgUserProps(u){
+  let gs=groupsOf(u.sid).map(g=>g.sid);
+  const d=dialog(`Propiedades: ${u.name}`,`
+   <div class="wtabs"><button class="on" data-t="g">General</button><button data-t="m">Miembro de</button><button disabled>Perfil</button></div>
+   <div class="wtab on" data-p="g"><p>👤 <b>${esc(u.name)}</b></p>
+    <label class="w">Nombre completo:<input type="text" id="up-full" value="${esc(u.full)}"></label>
+    <label class="w">Descripción:<input type="text" id="up-desc" value="${esc(u.comment)}"></label><hr>
+    ${chk('up-must','El usuario debe cambiar la contraseña en el siguiente inicio de sesión',u.mustChange)}
+    ${chk('up-cant','El usuario no puede cambiar la contraseña',u.cannotChange)}
+    ${chk('up-never','La contraseña nunca expira',u.neverExpires)}
+    ${chk('up-dis','La cuenta está deshabilitada',!u.active)}
+    <label class="chk dis"><input type="checkbox" disabled> La cuenta está bloqueada</label></div>
+   <div class="wtab" data-p="m"><div>Miembro de:</div><select id="up-groups" class="wlist" size="8"></select>
+    <div class="row"><button class="wbtn" id="up-add">Agregar...</button><button class="wbtn" id="up-rem">Quitar</button></div>
+    <p class="small" style="color:#555">Los cambios en la pertenencia a grupos de un usuario se aplican la próxima vez que el usuario inicia sesión.</p></div>`,
+   [{label:'Aceptar',primary:true,onClick:()=>apply()},{label:'Cancelar',cancel:true},{label:'Aplicar',onClick:()=>{apply();return false;}}],480);
+  const list=$('#up-groups',d);const refresh=()=>fillList(list,gs,false);refresh();
+  $('.wtabs',d).onclick=e=>{const b=e.target.closest('button[data-t]');if(!b)return;$$('.wtabs button',d).forEach(x=>x.classList.toggle('on',x===b));$$('.wtab',d).forEach(p=>p.classList.toggle('on',p.dataset.p===b.dataset.t));};
+  $('#up-add',d).onclick=()=>dlgSelect('grupos',objs=>{for(const g of objs)if(!gs.includes(g.sid))gs.push(g.sid);refresh();});
+  $('#up-rem',d).onclick=()=>{if(!list.value){msgbox('Seleccione un grupo de la lista.');return;}gs=gs.filter(s=>s!==list.value);refresh();};
+  mustWire(d,'up',false);
+  function apply(){
+    if(!S().users[u.sid]){msgbox('El usuario ya no existe.');return true;}
+    const v=id=>$('#'+id,d);
+    if(v('up-must').checked&&v('up-cant').checked){msgbox(`Ha seleccionado «El usuario debe cambiar la contraseña en el siguiente inicio de sesión» y «El usuario no puede cambiar la contraseña» para el usuario ${u.name}. Seleccione solo una de estas opciones.`);return false;}
+    u.full=v('up-full').value.trim();u.comment=v('up-desc').value.trim();
+    u.mustChange=v('up-must').checked;u.cannotChange=v('up-cant').checked;u.neverExpires=v('up-never').checked;u.active=!v('up-dis').checked;
+    const before=groupsOf(u.sid).map(g=>g.sid);
+    for(const s of before)if(!gs.includes(s)&&S().groups[s])opRemoveMember(S().groups[s],u);
+    for(const s of gs)if(!before.includes(s)&&S().groups[s])opAddMember(S().groups[s],u);
+    logEv(`GUI: Propiedades de ${u.name} → desc="${u.comment}", activa=${u.active?'sí':'no'}, cambiar pwd=${u.mustChange?'sí':'no'}, grupos=[${groupsOf(u.sid).map(g=>g.name).join(', ')}]`);
+    afterChange();return true;
+  }
+}
+function dlgGroup(g){
+  const isNew=!g;let ms=isNew?[]:[...g.members];
+  const d=dialog(isNew?'Grupo nuevo':`Propiedades: ${g.name}`,`
+   ${isNew?'<label class="w">Nombre del grupo:<input type="text" id="gp-name" autocomplete="off"></label>':`<p>👥 <b>${esc(g.name)}</b></p>`}
+   <label class="w">Descripción:<input type="text" id="gp-desc" value="${isNew?'':esc(g.comment)}" autocomplete="off"></label>
+   <div>Miembros:</div><select id="gp-mem" class="wlist" size="7"></select>
+   <div class="row"><button class="wbtn" id="gp-add">Agregar...</button><button class="wbtn" id="gp-rem">Quitar</button></div>`,
+   isNew?[{label:'Crear',primary:true,onClick:dd=>{
+      const name=$('#gp-name',dd).value.trim();if(!name){msgbox('Escriba un nombre de grupo.');return false;}
+      const e=opCreateGroup(name,$('#gp-desc',dd).value.trim());if(e){msgbox(`No se pudo crear el grupo ${name}:\n\n${cleanErr(e)}`);return false;}
+      const ng=groupBy(name);for(const s of ms)if(S().users[s])opAddMember(ng,S().users[s]);
+      logEv(`GUI: Grupo nuevo ${name} con miembros [${membersNames(name).join(', ')}]`);
+      $('#gp-name',dd).value='';$('#gp-desc',dd).value='';ms=[];refresh();afterChange();return false;}},{label:'Cerrar'}]
+   :[{label:'Aceptar',primary:true,onClick:()=>apply()},{label:'Cancelar',cancel:true},{label:'Aplicar',onClick:()=>{apply();return false;}}],460);
+  const list=$('#gp-mem',d);const refresh=()=>fillList(list,ms,true);refresh();
+  $('#gp-add',d).onclick=()=>dlgSelect('usuarios',objs=>{for(const u of objs)if(!ms.includes(u.sid))ms.push(u.sid);refresh();});
+  $('#gp-rem',d).onclick=()=>{if(!list.value){msgbox('Seleccione un miembro de la lista.');return;}ms=ms.filter(s=>s!==list.value);refresh();};
+  function apply(){
+    if(!S().groups[g.sid]){msgbox('El grupo ya no existe.');return true;}
+    g.comment=$('#gp-desc',d).value.trim();
+    for(const s of [...g.members])if(!ms.includes(s))g.members=g.members.filter(x=>x!==s);
+    for(const s of ms)if(!g.members.includes(s)&&S().users[s])g.members.push(s);
+    logEv(`GUI: Propiedades del grupo ${g.name} → desc="${g.comment}", miembros=[${membersNames(g.name).join(', ')}]`);
+    afterChange();return true;
+  }
+}
+function dlgRename(o,isUser){
+  dialog('Cambiar nombre',`<label class="w">Nuevo nombre:<input type="text" id="rn" value="${esc(o.name)}"></label>`,
+   [{label:'Aceptar',primary:true,onClick:dd=>{const n=$('#rn',dd).value.trim();if(n===o.name)return;const old=o.name;const e=isUser?opRenameUser(o,n):opRenameGroup(o,n);
+     if(e){msgbox(cleanErr(e));return false;}logEv(`GUI: Cambiar nombre ${old} → ${n}`);afterChange();}},{label:'Cancelar',cancel:true}]);
+}
+function dlgSetPw(u){
+  dialog(`Establecer contraseña para ${u.name}`,`<p class="msg">Restablecer esta contraseña podría causar la pérdida irreversible de información de esta cuenta de usuario (por ejemplo, archivos cifrados o credenciales guardadas). Solo debe restablecerla si el usuario la ha olvidado y no puede cambiarla él mismo.</p>`,
+   [{label:'Continuar',primary:true,onClick:()=>{setTimeout(()=>{
+     dialog(`Establecer contraseña para ${u.name}`,`<label class="w">Nueva contraseña:<input type="password" id="sp1" autocomplete="new-password"></label><label class="w">Confirmar contraseña:<input type="password" id="sp2" autocomplete="new-password"></label>`,
+      [{label:'Aceptar',primary:true,onClick:dd=>{const a=$('#sp1',dd).value,b=$('#sp2',dd).value;if(a!==b){msgbox('Las contraseñas escritas no coinciden.');return false;}
+        const e=opSetPassword(u,a);if(e){msgbox(cleanErr(e));return false;}logEv(`GUI: Establecer contraseña de ${u.name}`);afterChange();msgbox('Se ha establecido la contraseña.');}},{label:'Cancelar',cancel:true}]);},0);}},
+    {label:'Cancelar',cancel:true}],470);
+}
+function mmcDelete(){
+  const u=S().users[gui.sel],g=S().groups[gui.sel];
+  if(u){if(u.builtin){msgbox(`No se puede eliminar la cuenta integrada ${u.name}.`);return;}
+    confirmBox(`Cada usuario se representa mediante un identificador único (SID) que es independiente del nombre de usuario. Una vez eliminado un usuario, crear otro con el mismo nombre NO restaurará su acceso a los recursos ni sus pertenencias.\n\n¿Está seguro de que desea eliminar el usuario ${u.name}?`,'Usuarios y grupos locales',()=>{opDeleteUser(u);logEv(`GUI: Eliminar usuario ${u.name}`);gui.sel=null;afterChange();});}
+  else if(g){if(g.builtin){msgbox(`No se puede eliminar el grupo integrado ${g.name}.`);return;}
+    confirmBox(`Cada grupo se representa mediante un identificador único que es independiente del nombre del grupo. Una vez eliminado, crear otro grupo con el mismo nombre no restaurará el acceso a los recursos.\n\n¿Está seguro de que desea eliminar el grupo ${g.name}?`,'Usuarios y grupos locales',()=>{opDeleteGroup(g);logEv(`GUI: Eliminar grupo ${g.name}`);gui.sel=null;afterChange();});}
+}
+function mmcProps(){const u=S().users[gui.sel],g=S().groups[gui.sel];if(u)dlgUserProps(u);else if(g)dlgGroup(g);}
+function dlgSecpol(){
+  dialog('Directiva de seguridad local (secpol.msc)',`<p>📁 Configuración de seguridad › Directivas de cuenta › <b>Directiva de contraseñas</b></p>
+  <table class="secpol" style="width:100%;background:#fff;border:1px solid #ccc"><tr><td><b>Directiva</b></td><td><b>Configuración de seguridad</b></td></tr>
+  <tr><td>Exigir historial de contraseñas</td><td>24 contraseñas recordadas</td></tr><tr><td>Vigencia máxima de la contraseña</td><td>42 días</td></tr>
+  <tr><td>Vigencia mínima de la contraseña</td><td>1 días</td></tr><tr><td>Longitud mínima de la contraseña</td><td>7 caracteres</td></tr>
+  <tr><td>La contraseña debe cumplir los requisitos de complejidad</td><td>Habilitada</td></tr><tr><td>Almacenar contraseñas usando cifrado reversible</td><td>Deshabilitada</td></tr></table>
+  <p class="small" style="color:#444">Complejidad: al menos 3 de estos 4 tipos (mayúsculas, minúsculas, números, símbolos) y no contener el nombre de usuario ni partes del nombre completo.</p>`,[{label:'Cerrar',primary:true}],560);
+}
+function dlgRun(){
+  dialog('Ejecutar',`<p>Escriba el nombre del programa, carpeta, documento o recurso de Internet que desea abrir con Windows.</p><label class="w">Abrir:<input type="text" id="run-in" autocomplete="off"></label>`,
+   [{label:'Aceptar',primary:true,onClick:dd=>{const v=norm($('#run-in',dd).value);
+     if(['lusrmgr.msc','lusrmgr','compmgmt.msc'].includes(v))showTab('mmc');
+     else if(['secpol.msc','secpol'].includes(v))setTimeout(dlgSecpol,0);
+     else if(['cmd','powershell','cmd.exe','powershell.exe'].includes(v))showTab('ps');
+     else{msgbox(`Windows no encuentra '${$('#run-in',dd).value}'. Asegúrese de que el nombre está escrito correctamente e inténtelo de nuevo.`,'Ejecutar');return false;}}},{label:'Cancelar',cancel:true}],420);
+}
+function showTab(t){$$('.tabs [data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));$$('.pane').forEach(p=>p.classList.toggle('on',p.id==='pane-'+t));if(t==='ps')$('#ps-in')?.focus();if(t==='mmc')renderMMC();}
+
+/* ================= tickets ================= */
+const U=n=>userBy(n), G=n=>groupBy(n), M=inGroup;
+const hireOf=()=>P.hire;
+const TICKETS=[
+{id:'T1',day:'Lunes 08:05',from:'Carmen Vidal',role:'Gerencia',av:'CV',subject:'Inventario antes de tocar nada',
+ body:()=>`<p>¡Bienvenido/a a <b>SurTech S.L.</b>! Ramón, el técnico anterior, se marchó hace tres semanas sin dejar ninguna documentación.</p><p>Antes de cambiar nada quiero un <b>inventario</b> del servidor <code>SRV01</code>. Consulta el servidor (consola o <code>lusrmgr.msc</code>) y contéstame:</p>`,
+ qs:[{id:'q1',type:'number',text:'¿Cuántas cuentas de usuario locales hay en SRV01 (incluidas las integradas del sistema)?',answer:()=>Object.keys(S().users).length,explain:'Con <code>net user</code> se listan todas las cuentas locales.'},
+     {id:'q2',type:'multi',text:'¿Qué cuentas son miembros del grupo <b>Administradores</b>?',options:allUserNames,answer:()=>membersNames('Administradores'),explain:'Se consulta con <code>net localgroup Administradores</code>.'},
+     {id:'q3',type:'multi',text:'¿Qué cuentas están <b>deshabilitadas</b>?',options:allUserNames,answer:()=>Object.values(S().users).filter(u=>!u.active).map(u=>u.name),explain:'En lusrmgr.msc tienen una flecha ↓ en el icono; con <code>net user nombre</code> → «Cuenta activa: No».'}],
+ learn:'Un buen técnico documenta el estado inicial antes de tocar nada. Seguro que has visto cosas raras… irán apareciendo en los siguientes tickets.'},
+{id:'T2',day:'Lunes 08:40',from:'Ana Ruiz',role:'Contabilidad',av:'AR',subject:'¡No puedo entrar! 😩',
+ body:()=>`<p>Hola, hoy he vuelto de vacaciones y al iniciar sesión me sale <i>«Tu cuenta está deshabilitada. Ponte en contacto con el administrador del sistema»</i>. La contraseña la escribo bien, ¡te lo prometo!</p>`,
+ checks:()=>[['La cuenta de Ana existe y permite iniciar sesión',!!U('aruiz')&&U('aruiz').active]],
+ qs:[{id:'q1',type:'choice',text:'Ana escribía bien su contraseña pero no podía entrar. ¿Qué fase fallaba?',options:['La autenticación: el sistema no la dejaba iniciar sesión porque su cuenta estaba deshabilitada','La autorización: no tenía permisos sobre una carpeta','La red: el servidor no tenía dirección IP','El grupo Contabilidad estaba vacío'],answer:0},
+     {id:'q2',type:'choice',text:'Ahora Ana entra, pero no puede abrir los documentos de Ventas. ¿Qué tipo de situación es?',options:['Autorización: está identificada, pero no tiene permiso sobre ese recurso','Autenticación: su contraseña es incorrecta','Su cuenta sigue deshabilitada','Hay que eliminar su cuenta y crearla de nuevo'],answer:0}],
+ learn:'Iniciar sesión correctamente (autenticación) no significa poder usarlo todo (autorización).'},
+{id:'T3',day:'Lunes 10:15',from:'Carmen Vidal',role:'Gerencia',av:'CV',subject:'La cuenta de Ramón sigue viva',
+ body:()=>`<p>Me acaban de decir que la cuenta de <b>Ramón Moreno</b> todavía funciona. ¡Ya no trabaja aquí! Y encima era administrador…</p><p>Ojo: <b>antes de borrar nada</b> quiero que revisemos sus archivos. Asegúrate de que nadie pueda usar su cuenta y de que no conserve privilegios.</p>`,
+ fatal:()=>S().users[P.orig.rmoreno]?null:'Has eliminado la cuenta de Ramón cuando Gerencia pidió revisar sus archivos antes. Esa identidad (su SID) ya no se puede recuperar.',
+ checks:()=>{const u=S().users[P.orig.rmoreno];const a=G('Administradores');return [['Nadie puede iniciar sesión con la cuenta de Ramón',!!u&&!u.active],['Ramón ya no tiene privilegios de administrador',!!u&&!!a&&!a.members.includes(u.sid)]];},
+ qs:[{id:'q1',type:'choice',text:'¿Por qué es mejor deshabilitar la cuenta de Ramón en lugar de eliminarla ahora?',options:['Porque una cuenta deshabilitada se puede volver a habilitar y conserva su identidad; una eliminada no se recupera creándola con el mismo nombre','Porque Windows no permite eliminar cuentas que han sido administradoras','Porque deshabilitarla borra sus archivos de forma segura','No hay ninguna diferencia, es lo mismo'],answer:0}],
+ learn:'Deshabilitar ≠ eliminar. Una cuenta de un trabajador que se va se deshabilita primero; se elimina después, cuando se ha comprobado que no tiene datos ni recursos asociados.'},
+{id:'T4',day:'Lunes 12:30',from:'Pedro López',role:'Ventas',av:'PL',subject:'¡Ahora soy admin! 😎',
+ body:()=>`<p>Oye, no sé qué ha pasado pero ahora puedo instalar programas y cambiar la configuración del servidor. Ya me he instalado un juego y todo 🎮.</p><p>Mola, ¿no? No hace falta que toques nada 😅</p>`,
+ checks:()=>[['Pedro ya no es administrador',!!U('plopez')&&!M('Administradores','plopez')],['La cuenta de Pedro sigue existiendo y habilitada',!!U('plopez')&&U('plopez').active],['Pedro sigue en el grupo Ventas',M('Ventas','plopez')]],
+ qs:[{id:'q1',type:'choice',text:'¿Qué buena práctica no se cumplía con la cuenta de Pedro?',options:['El principio de mínimo privilegio','Una cuenta por trabajador','Los nombres de usuario normalizados','Las contraseñas largas'],answer:0}],
+ learn:'Quitar a un usuario de un grupo NO elimina su cuenta: solo retira esa pertenencia (y los privilegios que daba).'},
+{id:'T5',day:'Martes 08:15',from:'Lola Sanz',role:'Recursos Humanos',av:'LS',subject:'Nueva incorporación en Ventas',
+ body:()=>{const h=hireOf();return `<p>Mañana se incorpora <b>${esc(h.full)}</b> al departamento de <b>Ventas</b>. Créale su cuenta aplicando la <b>plantilla de la empresa</b>:</p>
+ <table class="tbl"><tr><th>Campo</th><th>Norma</th></tr><tr><td>Nombre de usuario</td><td>Inicial del nombre + primer apellido, en minúsculas, sin tildes ni espacios</td></tr>
+ <tr><td>Nombre completo</td><td>Nombre y dos apellidos</td></tr><tr><td>Descripción</td><td>Departamento</td></tr><tr><td>Contraseña inicial</td><td>Temporal y segura (invéntala cumpliendo la directiva)</td></tr>
+ <tr><td>Primer inicio de sesión</td><td>Debe cambiar la contraseña</td></tr><tr><td>Grupos</td><td>El de su departamento</td></tr><tr><td>Administrador</td><td>No</td></tr></table>`;},
+ checks:()=>{const h=hireOf(),u=U(h.user);return [['Existe una cuenta con el nombre de usuario que marca la plantilla',!!u],['Nombre completo correcto',!!u&&norm(u.full).replace(/\s+/g,' ')===norm(h.full)],['La descripción indica su departamento',!!u&&/ventas/i.test(u.comment)],
+   ['Debe cambiar la contraseña en el siguiente inicio de sesión',!!u&&u.mustChange],['La cuenta está habilitada',!!u&&u.active],['Pertenece al grupo de su departamento',M('Ventas',h.user)],['No tiene privilegios de administrador',!!u&&!M('Administradores',h.user)]];},
+ qs:[{id:'q1',type:'choice',text:'Si intentas poner la contraseña «1234», Windows la rechaza. ¿Dónde se consultan esos requisitos en SRV01?',options:['secpol.msc → Directivas de cuenta → Directiva de contraseñas','lusrmgr.msc → Grupos → Administradores','net localgroup Ventas','Panel de control → Centro de redes'],answer:0}],
+ learn:'Una plantilla garantiza que todas las cuentas se crean igual: nombres normalizados, descripción, contraseña temporal y cambio obligatorio.'},
+{id:'T6',day:'Martes 11:00',from:'Auditoría externa',role:'Seguridad',av:'🛡',subject:'Cuenta compartida «comercial»',
+ body:()=>`<p>Durante la auditoría hemos detectado la cuenta <code>comercial</code>. Según su descripción la usa <b>todo el departamento de Ventas</b> y su contraseña está en un pósit pegado al monitor. Además, no caduca nunca.</p><p>Decide qué hacer y <b>aplícalo en el servidor</b>.</p>`,
+ fatal:()=>S().users[P.orig.comercial]?null:'Has eliminado «comercial» sin comprobar si tenía datos asociados (pedidos, documentos…). Ya no hay vuelta atrás.',
+ checks:()=>{const c=S().users[P.orig.comercial];return [['Ya nadie puede iniciar sesión con «comercial»',!!c&&!c.active]];},
+ qs:[{id:'q1',type:'choice',text:'¿Cuál es la decisión más adecuada?',options:['Deshabilitar «comercial» y que cada comercial use su propia cuenta individual','Cambiar la contraseña y escribirla en un pósit nuevo','Añadir «comercial» al grupo Administradores para evitar problemas','Eliminarla inmediatamente sin revisar si tiene datos'],answer:0}],
+ learn:'Una cuenta por trabajador: con cuentas compartidas no se sabe quién hizo qué y la contraseña acaba circulando.'},
+{id:'T7',day:'Martes 13:00',from:'Carmen Vidal',role:'Gerencia',av:'CV',subject:'María cambia de departamento',
+ body:()=>`<p>Desde hoy <b>María García</b> pasa de <b>Contabilidad</b> a <b>Administración</b>. Que su cuenta refleje el cambio y que solo tenga lo de su nuevo departamento.</p><p>Eso sí: tiene que poder seguir trabajando con normalidad.</p>`,
+ checks:()=>{const u=U('mgarcia');return [['La cuenta mgarcia existe y está habilitada',!!u&&u.active],['Su descripción indica el nuevo departamento',!!u&&/administraci[oó]n/i.test(u.comment)],['Pertenece al grupo Administracion',M('Administracion','mgarcia')],['Ya no pertenece a Contabilidad',!!u&&!M('Contabilidad','mgarcia')]];},
+ qs:[{id:'q1',type:'choice',text:'Después del cambio, ¿qué ha pasado con la cuenta de María?',options:['Es la misma cuenta: solo han cambiado su descripción y sus grupos','Es una cuenta nueva con el mismo nombre','Ha perdido su contraseña y hay que restablecerla','Se ha deshabilitado automáticamente'],answer:0}],
+ learn:'Cambio de departamento: modificar descripción → quitar grupos antiguos → añadir los nuevos → comprobar pertenencias → verificar que la cuenta sigue habilitada.'},
+{id:'T8',day:'Miércoles 09:00',from:'Carmen Vidal',role:'Gerencia',av:'CV',subject:'Acceso a las facturas',
+ body:()=>`<p><b>Pedro</b> (Ventas) y <b>Ana</b> (Contabilidad) tienen que poder consultar las <b>facturas</b>. La carpeta la prepararemos más adelante, pero quiero que la organización de grupos quede lista ya: un grupo llamado <code>Facturas</code> con una descripción clara.</p><p>Y no quiero meter a Pedro en Contabilidad, ¿eh?</p>`,
+ checks:()=>{const g=G('Facturas');return [['Existe el grupo Facturas',!!g],['El grupo tiene una descripción',!!g&&!!g.comment.trim()],['Pedro es miembro de Facturas',M('Facturas','plopez')],['Ana es miembro de Facturas',M('Facturas','aruiz')],['Pedro sigue en Ventas y no está en Contabilidad',M('Ventas','plopez')&&!M('Contabilidad','plopez')],['Ana sigue en Contabilidad',M('Contabilidad','aruiz')]];},
+ qs:[{id:'q1',type:'choice',text:'Con el grupo ya creado, ¿pueden Pedro y Ana abrir la carpeta de facturas?',options:['Todavía no: crear un grupo no concede permisos; habrá que asignarlos sobre la carpeta más adelante','Sí, Windows da acceso automáticamente al crear el grupo','Solo si el grupo se llama igual que la carpeta','Solo si cierran sesión y la vuelven a abrir'],answer:0}],
+ learn:'Organización según necesidades de acceso: un usuario puede estar en su grupo de departamento y, además, en grupos de recursos (Facturas, Pedidos…).'},
+{id:'T9',day:'Miércoles 11:30',from:'Iván Gil',role:'Técnico en prácticas',av:'IG',subject:'¡No paro de recibir errores! 😵',
+ body:()=>`<p>Estoy practicando en otro servidor y todo me da error. ¿Me ayudas a entender qué pasa en cada caso?</p>`,
+ qs:[{id:'q1',type:'match',text:'Relaciona cada comando con la causa del error:',options:['El nombre de usuario no existe o está mal escrito','El grupo no existe o está mal escrito','El usuario ya pertenecía a ese grupo','La consola no se ha ejecutado como administrador','La cuenta está deshabilitada'],
+   items:[{l:'<code>net localgroup Ventas pl0pez /add</code><pre>Error de sistema 1332.\nNo se ha efectuado ninguna asignación entre los nombres de cuenta y los identificadores de seguridad.</pre>',a:0},
+          {l:'<code>net localgroup Venta plopez /add</code><pre>Error de sistema 1376.\nEl grupo local especificado no existe.</pre>',a:1},
+          {l:'<code>net localgroup Contabilidad aruiz /add</code><pre>Error de sistema 1378.\nEl nombre de cuenta especificado ya es miembro del grupo.</pre>',a:2},
+          {l:'<code>net user aruiz /active:yes</code> (en una ventana normal de CMD)<pre>Error de sistema 5.\nAcceso denegado.</pre>',a:3},
+          {l:'<code>net user plopes</code><pre>No se encuentra el nombre de usuario.</pre>',a:0}]},
+     {id:'q2',type:'choice',text:'Iván ejecuta <code>net localgroup Ventas plopez /delete</code>. ¿Qué le ocurre a la cuenta de Pedro?',options:['Sigue existiendo; solo deja de pertenecer al grupo Ventas','Se elimina la cuenta','Se deshabilita la cuenta','Pierde su contraseña'],answer:0}],
+ learn:'Leer bien los mensajes de error es la mitad de la solución: casi siempre indican si falla el usuario, el grupo o los permisos de la consola.'},
+{id:'T10',day:'Jueves 08:20',from:'Ana Ruiz',role:'Contabilidad',av:'AR',subject:'He olvidado mi contraseña 🙈',
+ onStart:rec=>{const u=U('aruiz');rec.snap={sid:u?.sid,resets:u?.resets||0};},
+ body:()=>`<p>Después de las vacaciones no me acuerdo de mi contraseña… ¿Me pones una temporal? Prometo cambiarla en cuanto entre.</p>`,
+ checks:rec=>{const u=U('aruiz');return [['La contraseña de Ana se ha restablecido',!!u&&(u.sid!==rec.snap?.sid||u.resets>(rec.snap?.resets||0))],['Ana deberá cambiarla en su próximo inicio de sesión',!!u&&u.mustChange],['La cuenta de Ana está habilitada',!!u&&u.active]];},
+ qs:[{id:'q1',type:'choice',text:'¿Qué diferencia hay entre lo que acabas de hacer y que Ana cambie su contraseña?',options:['Tú la restableces como administrador sin conocer la anterior; Ana la cambia conociendo la actual','Ninguna, es exactamente lo mismo','Restablecer elimina la cuenta y la vuelve a crear','Solo el administrador puede cambiar contraseñas'],answer:0}],
+ learn:'Restablecer (administrador) + «debe cambiar la contraseña en el siguiente inicio» = solo Ana conocerá su contraseña definitiva.'},
+{id:'T11',day:'Jueves 12:00',from:'Lola Sanz',role:'Recursos Humanos',av:'LS',subject:'Permiso de paternidad de Pedro',
+ body:()=>`<p><b>Pedro López</b> empieza mañana su permiso de paternidad (4 meses). Mientras esté fuera, <b>nadie debe poder iniciar sesión con su cuenta</b>.</p><p>Cuando vuelva tiene que encontrarlo todo exactamente igual.</p>`,
+ checks:()=>{const u=U('plopez');return [['La cuenta de Pedro sigue existiendo',!!u],['Nadie puede iniciar sesión con ella',!!u&&!u.active],['Conserva el grupo Ventas',M('Ventas','plopez')],['Conserva el grupo Facturas',M('Facturas','plopez')]];},
+ qs:[{id:'q1',type:'choice',text:'Cuando Pedro vuelva, ¿qué tendrás que hacer?',options:['Habilitar su cuenta (por ejemplo: net user plopez /active:yes)','Crear una cuenta nueva llamada plopez','Añadirlo al grupo Administradores','Volver a añadirlo a todos sus grupos'],answer:0}],
+ learn:'Ausencia temporal → deshabilitar. La cuenta conserva su SID, su contraseña y sus grupos.'},
+{id:'T12',day:'Viernes 09:00',from:'Carmen Vidal',role:'Gerencia',av:'CV',subject:'Limpieza de restos de pruebas',
+ onStart:rec=>{rec.snap=[...Object.values(S().users).map(u=>'u:'+u.name),...Object.values(S().groups).map(g=>'g:'+g.name)].filter(x=>!/^(u:prueba01|g:GrupoPrueba)$/i.test(x));},
+ body:()=>`<p>Ramón dejó cuentas y grupos de prueba por el servidor. Elimina <b>solo</b> lo que sea de pruebas (su descripción lo indica). Todo lo demás debe seguir existiendo.</p>`,
+ checks:rec=>{const snap=rec.snap||[];return [['La cuenta de pruebas ya no existe',!U('prueba01')],['El grupo de pruebas ya no existe',!G('GrupoPrueba')],['No se ha eliminado ninguna otra cuenta ni grupo',snap.every(x=>x.startsWith('u:')?!!U(x.slice(2)):!!G(x.slice(2)))]];},
+ qs:[{id:'q1',type:'choice',text:'Antes de eliminar una cuenta, ¿qué debes comprobar?',options:['Que no tenga datos o recursos asociados y que no sea una cuenta del sistema ni de un trabajador activo','Nada: eliminar siempre es más seguro que deshabilitar','Que tenga la contraseña caducada','Que pertenezca al grupo Administradores'],answer:0}],
+ learn:'Eliminar es irreversible: solo para cuentas temporales o de prueba, y tras comprobar que no tienen nada asociado.'},
+];
+function urgentDef(x){return {id:x.id,urgent:true,day:'¡AHORA!',from:x.full,role:'Trabajador/a',av:'!!',subject:'¡Mi cuenta ha desaparecido!',
+  body:()=>`<p>¡Socorro! Intento iniciar sesión y me dice que <b>el usuario no existe</b>. Mis compañeros dicen que han borrado mi cuenta (<code>${esc(x.name)}</code>)… ¡Necesito trabajar!</p><p class="note">⚠️ Has eliminado la cuenta de un trabajador en activo (−5 puntos). Vuelve a crearla con el mismo nombre de usuario, habilitada y en el grupo de su departamento.</p>`,
+  checks:()=>{const u=U(x.name);return [['Vuelve a existir la cuenta '+x.name,!!u],['La cuenta está habilitada',!!u&&u.active],['Pertenece al grupo de su departamento',!!u&&['Ventas','Contabilidad','Administracion'].some(g=>M(g,x.name))]];},
+  qs:[],learn:'Aunque la hayas creado con el mismo nombre, <b>es una cuenta nueva con otro SID</b>: ha perdido sus grupos, su configuración y cualquier permiso que tuviera la antigua. Por eso, ante la duda, se <b>deshabilita</b>, no se elimina.'};}
+const defById=id=>TICKETS.find(t=>t.id===id)||(()=>{const x=P.urgent.find(u=>u.id===id);return x&&urgentDef(x);})();
+const R=id=>P.tickets[id]||(P.tickets[id]={attempts:0,done:false});
+function currentId(){const u=P.urgent.find(x=>!R(x.id).done);if(u)return u.id;const t=TICKETS.find(t=>!R(t.id).done);return t?t.id:null;}
+function ticketsDone(){return TICKETS.filter(t=>P.tickets[t.id]?.done).length;}
+
+function qHtml(t,q,rec){
+  const pre=`${t.id}-${q.id}`;
+  if(q.type==='choice'){const ord=perm(q.options.length,P.seed+pre);return `<div class="q" data-q="${q.id}"><div class="qt">${q.text}</div>${ord.map(i=>`<label class="opt"><input type="radio" name="${pre}" value="${i}"> <span>${esc(q.options[i])}</span></label>`).join('')}</div>`;}
+  if(q.type==='number')return `<div class="q" data-q="${q.id}"><div class="qt">${q.text}</div><input type="number" min="0" name="${pre}"></div>`;
+  if(q.type==='multi')return `<div class="q" data-q="${q.id}"><div class="qt">${q.text} <span class="muted small">(marca todas las que correspondan)</span></div><div class="multi">${q.options().map(n=>`<label><input type="checkbox" name="${pre}" value="${esc(n)}"> ${esc(n)}</label>`).join('')}</div></div>`;
+  if(q.type==='match'){const ord=perm(q.options.length,P.seed+pre);return `<div class="q" data-q="${q.id}"><div class="qt">${q.text}</div>${q.items.map((it,k)=>`<div class="item">${it.l}<select name="${pre}-${k}"><option value="">— Elige la causa —</option>${ord.map(i=>`<option value="${i}">${esc(q.options[i])}</option>`).join('')}</select></div>`).join('')}</div>`;}
+}
+function readAnswer(t,q){
+  const pre=`${t.id}-${q.id}`,box=$('#ticket');
+  if(q.type==='choice'){const r=$(`input[name="${pre}"]:checked`,box);return r?Number(r.value):null;}
+  if(q.type==='number'){const v=$(`input[name="${pre}"]`,box).value.trim();return v===''?null:Number(v);}
+  if(q.type==='multi')return $$(`input[name="${pre}"]:checked`,box).map(i=>i.value);
+  if(q.type==='match'){const v=q.items.map((_,k)=>$(`select[name="${pre}-${k}"]`,box).value);return v.includes('')?null:v.map(Number);}
+}
+function gradeQ(q,a){
+  if(q.type==='choice')return {score:a===q.answer?1:0,exp:q.options[q.answer],given:q.options[a]};
+  if(q.type==='number'){const e=q.answer();return {score:a===e?1:0,exp:String(e),given:String(a)};}
+  if(q.type==='multi'){const e=q.answer().map(x=>x.toLowerCase()).sort(),g=a.map(x=>x.toLowerCase()).sort();return {score:e.join('|')===g.join('|')?1:0,exp:q.answer().sort(cmp).join(', ')||'(ninguna)',given:a.join(', ')||'(ninguna)'};}
+  if(q.type==='match'){const ok=q.items.filter((it,k)=>a[k]===it.a).length;return {score:ok/q.items.length,exp:q.items.map((it,k)=>`${k+1}) ${q.options[it.a]}`).join(' · '),given:`${ok} de ${q.items.length} correctas`};}
+}
+function solve(){
+  const id=P.view||currentId();const t=defById(id),rec=R(id);if(!t||rec.done)return;
+  const answers={};
+  for(const q of t.qs){const a=readAnswer(t,q);if(a===null){fb('Responde todas las preguntas antes de resolver el ticket.');return;}answers[q.id]=a;}
+  const fatal=t.fatal?t.fatal():null;
+  const checks=t.checks?t.checks(rec).map(([l,ok])=>[l,!!ok]):[];
+  const failed=checks.filter(c=>!c[1]);
+  if(!fatal&&failed.length){
+    rec.attempts++;logEv(`Ticket ${id}: intento fallido (${failed.map(f=>f[0]).join('; ')})`);save();renderHeader();
+    fb(`<b>El ticket todavía no está resuelto</b> (intento fallido nº ${rec.attempts}${t.urgent?'':', −1 punto'}). Revisa en el servidor:<ul class="checks">${failed.map(f=>`<li class="ko"><span class="ic">✗</span>${esc(f[0])}</li>`).join('')}</ul>`);return;}
+  const actionMax=t.urgent?0:(t.checks?6:0);
+  let pts=actionMax?(fatal?0:Math.max(2,actionMax-rec.attempts)):0;
+  const qMax=t.urgent||!t.qs.length?0:(10-actionMax)/t.qs.length;
+  rec.qres={};
+  for(const q of t.qs){const r=gradeQ(q,answers[q.id]);rec.qres[q.id]=r;pts+=r.score*qMax;}
+  Object.assign(rec,{done:true,pts:Math.round(pts*100)/100,fatal,checks,at:now()});
+  logEv(`Ticket ${id} resuelto: ${rec.pts} puntos${fatal?' (acción irreversible)':''}`);
+  P.view=id;save();renderInbox();renderTicket();renderHeader();
+}
+function fb(html){const el=$('#tk-fb');el.className='fb warn';el.innerHTML=html;el.scrollIntoView({block:'nearest',behavior:'smooth'});}
+function renderInbox(){
+  const el=$('#inbox');if(!el)return;const cur=currentId();const view=P.view||cur;
+  const item=(t,rec)=>`<button class="tk ${t.urgent&&!rec.done?'urg':''} ${t.id===view?'sel':''}" data-act="tk-open" data-id="${t.id}">${rec.done?'✅':(t.urgent?'🚨':'📩')} ${esc(t.subject)}<span class="s">${esc(t.from)} · ${esc(t.day)}${rec.done?` · ${rec.pts} pts`:''}</span></button>`;
+  const urg=P.urgent.map(x=>item(urgentDef(x),R(x.id))).join('');
+  const shown=TICKETS.filter(t=>R(t.id).done||t.id===cur||(cur&&cur.startsWith('URG')&&t.id===TICKETS.find(x=>!R(x.id).done)?.id));
+  const locked=TICKETS.length-shown.length;
+  el.innerHTML=`<h3>Bandeja de tickets</h3>${urg}${shown.map(t=>item(t,R(t.id))).join('')}${locked?`<div class="locked">🔒 ${locked} ticket${locked>1?'s':''} más por llegar…</div>`:''}
+   ${!cur?`<button class="btn primary" style="width:100%;margin-top:8px" data-act="go" data-p="3">Fase 3: misión real →</button>`:''}`;
+}
+function renderTicket(){
+  const el=$('#ticket');if(!el)return;
+  const cur=currentId();let id=P.view||cur;
+  if(!id){el.innerHTML=`<h2>🎉 ¡Semana completada!</h2><p>Has resuelto todos los tickets de SurTech. Ahora toca demostrarlo en tu <b>SRV01 real</b>.</p><button class="btn primary" data-act="go" data-p="3">Ir a la misión real →</button>`;return;}
+  const t=defById(id),rec=R(id);shownId=id;
+  if(!rec.done&&id!==cur){P.view=null;id=cur;return renderTicket();}
+  if(!rec.done&&t.onStart&&rec.snap===undefined){t.onStart(rec);save();}
+  const head=`<div class="tk-head"><div class="av ${t.urgent?'urg':''}">${esc(t.av)}</div><div><b>${esc(t.from)}</b> · <span class="muted">${esc(t.role)}</span><br><span class="small muted">${esc(t.day)} · Ticket ${esc(t.id)}</span></div></div><h3>${esc(t.subject)}</h3>${t.body()}`;
+  if(!rec.done){
+    el.innerHTML=`${head}${t.qs.map(q=>qHtml(t,q,rec)).join('')}<div id="tk-fb"></div>
+     <div class="row" style="margin-top:12px"><button class="btn primary" data-act="tk-solve">✔ Marcar como resuelto</button></div>
+     <p class="small muted">${t.checks?'Al marcarlo como resuelto se comprueba el estado REAL del servidor simulado. Cada intento fallido resta 1 punto.':'Este ticket solo tiene preguntas: tendrás un único intento.'}</p>`;
+  }else{
+    const nxt=currentId();
+    el.innerHTML=`${head}
+     ${rec.fatal?`<div class="fb warn">⚠️ ${esc(rec.fatal)}</div>`:''}
+     ${rec.checks?.length?`<ul class="checks">${rec.checks.map(c=>`<li class="${c[1]?'ok':'ko'}"><span class="ic">${c[1]?'✓':'✗'}</span>${esc(c[0])}</li>`).join('')}</ul>`:''}
+     ${t.qs.map(q=>{const r=rec.qres?.[q.id];if(!r)return '';return `<div class="q"><div class="qt">${q.text}</div><div>${r.score===1?'<span class="res-ok">✓ Correcto</span>':r.score>0?`<span class="res-ko">◐ Parcial</span>`:'<span class="res-ko">✗ Incorrecto</span>'} · Tu respuesta: ${esc(r.given)}</div>${r.score<1?`<div class="small">Respuesta correcta: <b>${esc(r.exp)}</b></div>`:''}${q.explain?`<div class="small muted">${q.explain}</div>`:''}</div>`;}).join('')}
+     <div class="learn">💡 ${t.learn}</div>
+     <p><b>Puntuación del ticket: ${rec.pts}${t.urgent?'':' / 10'}</b>${rec.attempts?` <span class="muted small">(${rec.attempts} intento${rec.attempts>1?'s':''} fallido${rec.attempts>1?'s':''})</span>`:''}</p>
+     ${nxt?`<button class="btn primary" data-act="tk-next">Siguiente ticket →</button>`:`<button class="btn primary" data-act="go" data-p="3">Ir a la misión real →</button>`}`;
+  }
+}
+
+/* ================= análisis de salidas reales (fase 1 y 3) ================= */
+function parseNet(text){
+  const res={userLists:[],users:{},groups:{}};let cur=null;
+  const lines=String(text||'').replace(/\r/g,'').split('\n');
+  for(const raw of lines){
+    const line=raw.replace(/\s+$/,'');let m;
+    if((m=line.match(/^\s*(Cuentas de usuario de|User accounts for)\s+\\\\(\S+)/i))){cur={type:'list',host:m[2],names:[],dash:false};res.userLists.push(cur);continue;}
+    if((m=line.match(/^(Nombre de usuario|User name)\s{2,}(\S.*)$/i))){cur={type:'user',name:m[2].trim(),f:{},groups:[],inG:false};res.users[cur.name.toLowerCase()]=cur;continue;}
+    if((m=line.match(/^(Nombre de alias|Alias name)\s{2,}(\S.*)$/i))){cur={type:'group',name:m[2].trim(),comment:'',members:[],dash:false};res.groups[skel(cur.name)]=cur;continue;}
+    if(!cur)continue;
+    if(/(completado el comando|command completed)/i.test(line)||/^(Error de sistema|System error)/i.test(line)){cur=null;continue;}
+    if(cur.type==='list'){if(/^-{10,}/.test(line)){cur.dash=true;continue;}if(cur.dash&&line.trim())cur.names.push(...line.trim().split(/\s+/));}
+    else if(cur.type==='group'){if(/^-{10,}/.test(line)){cur.dash=true;continue;}
+      if(!cur.dash){const c=line.match(/^(Comentario|Comment)\b\s*(.*)$/i);if(c)cur.comment=c[2].trim();}else if(line.trim())cur.members.push(line.trim());}
+    else{
+      const gl=line.match(/^(Miembros del grupo local|Local Group Memberships)\s*(.*)$/i);
+      if(gl){cur.inG=true;cur.groups.push(...gl[2].split('*').map(s=>s.trim()).filter(Boolean));continue;}
+      if(/^(Miembros del grupo global|Global Group memberships)/i.test(line)){cur.inG=false;continue;}
+      if(cur.inG&&/^\s+\*/.test(raw)){cur.groups.push(...line.split('*').map(s=>s.trim()).filter(Boolean));continue;}
+      cur.inG=false;
+      const f=line.match(/^(.+?)\s{2,}(.*)$/);if(f)cur.f[norm(f[1])]=f[2].trim();else if(line.trim())cur.f[norm(line.trim())]='';
+    }
+  }
+  return res;
+}
+const pf=(u,...k)=>{for(const x of k)if(u&&u.f[x]!==undefined)return u.f[x];return undefined;};
+const rFindGroup=(r,n)=>Object.values(r.groups).find(g=>looseEq(g.name,n));
+const rFindUser=(r,n)=>r.users[n.toLowerCase()];
+const rHas=(g,u)=>!!g&&g.members.some(m=>strip(m).toLowerCase()===u.toLowerCase());
+const rUserIn=(u,gn)=>!!u&&u.groups.some(g=>looseEq(g,gn));
+const isYes=v=>/^\s*[sy]/i.test(v||'');
+function lab1Checks(text){
+  const r=parseNet(text),L=[],list=r.userLists[0];
+  L.push({l:'Se encuentra la salida de «net user»',ok:!!list,fix:'Copia la salida completa del comando, desde «Cuentas de usuario de…».'});
+  if(list)L.push({l:`El servidor se llama SRV01 (detectado: ${list.host})`,ok:/^srv01$/i.test(list.host),fix:'Tu servidor debería llamarse SRV01. Consúltalo con tu profesor.'});
+  for(const [u,full,dep] of [['mgarcia','María García','Contabilidad'],['plopez','Pedro López','Ventas'],['aruiz','Ana Ruiz','Contabilidad']])
+    L.push({l:`Existe la cuenta ${u}`,ok:!!list&&list.names.some(n=>n.toLowerCase()===u),fix:`net user ${u} * /add /fullname:"${full}" /comment:"${dep}"`});
+  for(const [g,ms] of [['Ventas',['plopez']],['Contabilidad',['mgarcia','aruiz']],['Administracion',[]]]){
+    const G_=rFindGroup(r,g);L.push({l:`Existe el grupo ${g}`,ok:!!G_,fix:`net localgroup ${g} /add`});
+    for(const m of ms)L.push({l:`${m} es miembro de ${g}`,ok:rHas(G_,m),fix:`net localgroup ${g} ${m} /add`});
+  }
+  return L;
+}
+function realCmd(){return `(net user & net user ${P.hire.user} & net user mgarcia & net user plopez & net localgroup Facturas & net localgroup Contabilidad & net localgroup Administracion) | clip`;}
+function realChecks(text){
+  const r=parseNet(text),h=P.hire,L=[],list=r.userLists[0];
+  L.push({s:'0',l:'La salida procede de tu servidor SRV01',ok:!!list&&/^srv01$/i.test(list.host)});
+  const H=rFindUser(r,h.user);
+  L.push({s:'A',l:`Existe la cuenta ${h.user}`,ok:!!H});
+  L.push({s:'A',l:`Nombre completo: ${h.full}`,ok:!!H&&looseEq(pf(H,'nombre completo','full name'),h.full)});
+  L.push({s:'A',l:'Descripción con su departamento (Ventas)',ok:/ventas/i.test(pf(H,'comentario','comment')||'')});
+  L.push({s:'A',l:'La cuenta está activa',ok:isYes(pf(H,'cuenta activa','account active'))});
+  L.push({s:'A',l:'Es miembro de Ventas',ok:rUserIn(H,'Ventas')});
+  L.push({s:'A',l:'No es miembro de Administradores',ok:!!H&&!rUserIn(H,'Administradores')});
+  const F=rFindGroup(r,'Facturas');
+  L.push({s:'B',l:'Existe el grupo Facturas',ok:!!F});
+  L.push({s:'B',l:'Facturas tiene descripción',ok:!!F&&!!F.comment});
+  L.push({s:'B',l:'plopez es miembro de Facturas',ok:rHas(F,'plopez')});
+  L.push({s:'B',l:'aruiz es miembro de Facturas',ok:rHas(F,'aruiz')});
+  const Mg=rFindUser(r,'mgarcia'),Cg=rFindGroup(r,'Contabilidad'),Ag=rFindGroup(r,'Administracion');
+  L.push({s:'C',l:'mgarcia tiene la descripción de Administración',ok:/administraci/i.test(pf(Mg,'comentario','comment')||'')});
+  L.push({s:'C',l:'mgarcia es miembro de Administracion',ok:rUserIn(Mg,'Administracion')&&(!Ag||rHas(Ag,'mgarcia'))});
+  L.push({s:'C',l:'mgarcia ya no está en Contabilidad',ok:!!Mg&&!rUserIn(Mg,'Contabilidad')&&!!Cg&&!rHas(Cg,'mgarcia')});
+  L.push({s:'C',l:'La cuenta mgarcia está activa',ok:isYes(pf(Mg,'cuenta activa','account active'))});
+  const Pd=rFindUser(r,'plopez');
+  L.push({s:'D',l:'La cuenta plopez sigue existiendo',ok:!!Pd});
+  L.push({s:'D',l:'La cuenta plopez está deshabilitada',ok:!!Pd&&!isYes(pf(Pd,'cuenta activa','account active'))});
+  L.push({s:'D',l:'plopez conserva Ventas y Facturas',ok:rUserIn(Pd,'Ventas')&&rUserIn(Pd,'Facturas')});
+  return L;
+}
+function checksHtml(L){return `<ul class="checks">${L.map(c=>`<li class="${c.ok?'ok':'ko'}"><span class="ic">${c.ok?'✓':'✗'}</span><span>${c.s&&c.s!=='0'?`<b>${c.s}</b> · `:''}${esc(c.l)}</span>${!c.ok&&c.fix?`<span class="fix">Para arreglarlo: <code>${esc(c.fix)}</code></span>`:''}</li>`).join('')}</ul>`;}
+
+/* ================= notas ================= */
+function grades(){
+  const tk=TICKETS.reduce((a,t)=>a+(P.tickets[t.id]?.pts||0),0);
+  const adm=P.server&&G('Administradores');
+  const extraAdmins=adm?adm.members.filter(s=>S().users[s]&&S().users[s].name!=='Administrador').map(s=>S().users[s].name):[];
+  const audit=(ticketsDone()===TICKETS.length&&extraAdmins.length)?5:0;
+  const pen=P.penalties.reduce((a,b)=>a+b.pts,0)+audit;
+  const sim=Math.max(0,tk-pen);
+  const simN=sim/(TICKETS.length*10)*10;
+  const realN=P.real?P.real.ok/P.real.total*10:0;
+  return {tk,pen,audit,extraAdmins,sim,simN,realN,final:simN*0.6+realN*0.4};
+}
+
+/* ================= pantallas ================= */
+const PHASES=['Inicio','1 · Laboratorio','2 · Semana en SurTech','3 · Misión real','4 · Informe'];
+function renderHeader(){
+  const h=$('#hdr');
+  if(!P){h.innerHTML='<div class="brand">Sur<span>Tech</span> S.L.</div><span class="muted small">Práctica global · UD2 Usuarios, grupos y perfiles</span>';return;}
+  const g=grades();
+  h.innerHTML=`<div class="brand">Sur<span>Tech</span> S.L.</div>
+   <nav class="steps">${[1,2,3,4].map(i=>`<button class="step ${P.screen===i?'on':''} ${i<P.maxPhase?'done':''}" data-act="go" data-p="${i}" ${i>P.maxPhase?'disabled':''}>${PHASES[i]}</button>`).join('')}</nav>
+   <span class="pill">👤 ${esc(P.student.nombre)} · 🎫 ${ticketsDone()}/${TICKETS.length} · ⭐ ${Math.round(g.sim*10)/10} pts</span>`;
+}
+function renderLogin(){
+  $('#main').innerHTML=`<section class="card">
+   <h1>🏢 Tu primera semana en SurTech S.L.</h1>
+   <p>SurTech S.L. es una pequeña empresa de distribución de material informático. Acabas de entrar como <b>técnico/a de sistemas</b> y tu servidor es <code>SRV01</code> (Windows Server 2025). El técnico anterior, Ramón, se fue sin dejar documentación… y el servidor tiene sorpresas.</p>
+   <ol>
+    <li><b>Laboratorio</b>: comprueba que tu SRV01 real (VirtualBox) está como lo dejamos en clase.</li>
+    <li><b>Semana en SurTech</b>: resuelve los tickets de la empresa en un servidor simulado con consola y <code>lusrmgr.msc</code>. Lo que hagas tiene consecuencias.</li>
+    <li><b>Misión real</b>: aplica los cambios en tu SRV01 y demuéstralo pegando la salida de los comandos.</li>
+    <li><b>Informe</b>: obtén tu nota y entrégala (PDF).</li></ol>
+   <p class="tip">⚠️ Escribe tu nombre real: a partir de él se genera <b>tu propio escenario</b> (el trabajador que tendrás que dar de alta es distinto para cada alumno). El progreso se guarda en este navegador.</p>
+   <form id="login"><label class="field">Nombre<input name="nombre" required autocomplete="given-name"></label>
+   <label class="field">Apellidos<input name="apellidos" required autocomplete="family-name"></label>
+   <label class="field">Grupo (opcional)<input name="grupo" placeholder="2.º SMR A"></label>
+   <button class="btn primary">Empezar →</button></form></section>`;
+  $('#login').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);
+    const st={nombre:String(f.get('nombre')).trim(),apellidos:String(f.get('apellidos')).trim(),grupo:String(f.get('grupo')||'').trim()};
+    if(!st.nombre||!st.apellidos)return;P=newProgress(st);logEv(`Inicio de la práctica: ${st.nombre} ${st.apellidos}`);save();render();};
+}
+function copyBtn(txt){return `<button class="btn small" data-act="copy" data-txt="${esc(txt)}">📋 Copiar</button>`;}
+function renderPhase1(){
+  const c1='(net user & net localgroup Ventas & net localgroup Contabilidad & net localgroup Administracion) | clip';
+  $('#main').innerHTML=`<section class="card"><h2>Fase 1 · Comprobación del laboratorio (SRV01 real)</h2>
+   <p>Antes de tu primer día comprueba que tu servidor está como lo dejamos en clase. <b>Esta fase no puntúa</b>, pero si algo falla, arréglalo ahora: lo necesitarás en la fase 3.</p>
+   <ol><li>Arranca <code>SRV01</code> en VirtualBox e inicia sesión como <b>Administrador</b>.</li>
+   <li>Abre el símbolo del sistema: <code>Windows + R</code> → <code>cmd</code>.</li>
+   <li>Ejecuta este comando (la salida se copia al portapapeles gracias a <code>| clip</code>):</li></ol>
+   <div class="copyrow"><pre>${esc(c1)}</pre>${copyBtn(c1)}</div>
+   <p>4. Pega aquí la salida (<code>Ctrl+V</code>) y pulsa <b>Comprobar</b>:</p>
+   <textarea class="paste" id="lab1-in" placeholder="Cuentas de usuario de \\\\SRV01 ...">${esc(P.lab1?.text||'')}</textarea>
+   <div class="row"><button class="btn primary" data-act="lab1">Comprobar</button></div>
+   <div id="lab1-res">${P.lab1?resLab1(P.lab1.checks):''}</div>
+   <hr style="border-color:var(--line)"><div class="row"><button class="btn primary" data-act="go" data-p="2">Continuar a la semana en SurTech →</button>${!P.lab1?'<span class="muted small" style="align-self:center">(Puedes continuar sin comprobarlo, pero quedará registrado en el informe.)</span>':''}</div></section>`;
+}
+function resLab1(L){const ok=L.filter(c=>c.ok).length;return `<p><b>${ok===L.length?'✅ Tu laboratorio está listo.':`⚠️ ${L.length-ok} cosa(s) por arreglar.`}</b> ${ok}/${L.length} comprobaciones correctas.${ok<L.length?' Arréglalo en SRV01 y vuelve a comprobar.':''}</p>${checksHtml(L)}`;}
+function renderPhase2(){
+  $('#main').innerHTML=`<section class="ph2"><aside class="inbox" id="inbox"></aside><section class="ticket" id="ticket"></section>
+   <section class="server"><div class="tabs"><button data-tab="ps" class="on" data-act="tab">⌨ PowerShell (Administrador) — SRV01</button><button data-tab="mmc" class="mm" data-act="tab">👥 Usuarios y grupos locales</button><button class="run" data-act="run">⊞ Ejecutar (Win+R)</button></div>
+   <div id="pane-ps" class="pane on"><div class="ps" id="ps"><div id="ps-out"></div><div class="ps-line"><span id="ps-prompt"></span><input id="ps-in" autocomplete="off" spellcheck="false" aria-label="Consola"></div></div></div>
+   <div id="pane-mmc" class="pane"><div id="mmc" class="mmc"></div></div></section></section>`;
+  termInit();renderMMC();renderInbox();renderTicket();
+}
+function renderPhase3(){
+  const h=P.hire,cmd=realCmd();
+  $('#main').innerHTML=`<section class="card"><h2>Fase 3 · Misión real en tu SRV01</h2>
+   <p>Gerencia quiere que todo lo de esta semana quede aplicado en el servidor de verdad. Hazlo en tu <b>SRV01 de VirtualBox</b> con las herramientas que prefieras (<code>lusrmgr.msc</code> o comandos).</p>
+   <table class="tbl"><tr><th>Misión</th><th>Qué hay que conseguir</th></tr>
+   <tr><td><b>A</b> · Alta</td><td>Cuenta para <b>${esc(h.full)}</b> (Ventas) siguiendo la plantilla de la empresa: nombre de usuario normalizado, nombre completo, descripción, contraseña temporal segura, <b>cambio de contraseña en el siguiente inicio</b>, grupo de su departamento y sin privilegios de administrador.</td></tr>
+   <tr><td><b>B</b> · Facturas</td><td>Grupo <code>Facturas</code> con descripción. Miembros: Pedro y Ana.</td></tr>
+   <tr><td><b>C</b> · Traslado</td><td>María pasa a Administración: descripción actualizada, fuera de Contabilidad, dentro de <code>Administracion</code> y con la cuenta activa.</td></tr>
+   <tr><td><b>D</b> · Permiso</td><td>Pedro está de permiso: nadie puede iniciar sesión con su cuenta, pero debe conservar sus grupos.</td></tr></table>
+   <p class="tip">💡 Si en tu SRV01 faltan cuentas o grupos de clase, créalos primero (mira la fase 1).</p>
+   <h3>Demuéstralo</h3><p>En CMD como Administrador ejecuta (copia la salida al portapapeles) y pégala abajo:</p>
+   <div class="copyrow"><pre>${esc(cmd)}</pre>${copyBtn(cmd)}</div>
+   <textarea class="paste" id="real-in" placeholder="Pega aquí la salida completa">${esc(P.real?.text||'')}</textarea>
+   <div class="row"><button class="btn primary" data-act="real">Validar en mi SRV01</button></div>
+   <div id="real-res">${P.real?resReal(P.real):''}</div>
+   <hr style="border-color:var(--line)"><button class="btn primary" data-act="go" data-p="4" ${P.real?'':'disabled'}>Ver mi informe final →</button></section>`;
+}
+function resReal(x){return `<p><b>${x.ok}/${x.total}</b> comprobaciones correctas (${Math.round(x.ok/x.total*100)}%). Puedes corregir en tu servidor y volver a validar tantas veces como quieras.</p>${checksHtml(x.checks)}`;}
+function renderReport(){
+  const g=grades(),f=n=>(Math.round(n*100)/100).toFixed(2);
+  const rows=[...TICKETS.map(t=>[t,P.tickets[t.id]]),...P.urgent.map(x=>[urgentDef(x),P.tickets[x.id]])];
+  $('#main').innerHTML=`<section class="card"><h2>Informe final · Práctica global UD2</h2>
+   <table class="tbl"><tr><th>Alumno/a</th><td>${esc(P.student.nombre)} ${esc(P.student.apellidos)}</td><th>Grupo</th><td>${esc(P.student.grupo||'—')}</td></tr>
+   <tr><th>Inicio</th><td>${esc(P.started)}</td><th>Informe</th><td>${esc(now())}</td></tr>
+   <tr><th>Nueva incorporación</th><td>${esc(P.hire.full)}</td><th>Reinicios</th><td>${esc(localGet(RKEY)||'0')}</td></tr></table>
+   <div class="row" style="align-items:center;gap:24px"><div><div class="muted small">NOTA FINAL</div><div class="grade">${f(g.final)}</div></div>
+   <div class="small">Semana en SurTech (60 %): <b>${f(g.simN)}</b> / 10 · ${f(g.sim)} de ${TICKETS.length*10} pts<br>Misión real en SRV01 (40 %): <b>${f(g.realN)}</b> / 10 ${P.real?`· ${P.real.ok}/${P.real.total} comprobaciones`:'· sin validar'}</div></div>
+   ${ticketsDone()<TICKETS.length?`<p class="note">⚠️ Faltan ${TICKETS.length-ticketsDone()} tickets por resolver: puntúan 0.</p>`:''}
+   <h3>Fase 1 · Laboratorio</h3><p>${P.lab1?`${P.lab1.checks.filter(c=>c.ok).length}/${P.lab1.checks.length} comprobaciones correctas (${esc(P.lab1.at)})`:'No se comprobó.'}</p>
+   <h3>Fase 2 · Tickets</h3><table class="tbl"><tr><th>Ticket</th><th>Asunto</th><th>Intentos fallidos</th><th>Preguntas</th><th>Puntos</th></tr>
+   ${rows.map(([t,r])=>`<tr><td>${t.id}</td><td>${esc(t.subject)}${r?.fatal?' <span class="res-ko">(acción irreversible)</span>':''}</td><td>${r?.attempts||0}</td><td>${r?.qres?Object.values(r.qres).map(q=>q.score===1?'✓':q.score>0?'◐':'✗').join(' ')||'—':'—'}</td><td>${r?.done?r.pts:'pendiente'}</td></tr>`).join('')}</table>
+   ${P.penalties.length||g.audit?`<p><b>Penalizaciones:</b></p><ul>${P.penalties.map(p=>`<li>−${p.pts}: ${esc(p.why)}</li>`).join('')}${g.audit?`<li>−5: auditoría final, cuentas en Administradores que no deberían estar (${esc(g.extraAdmins.join(', '))})</li>`:''}</ul>`:''}
+   <h3>Fase 3 · Misión real</h3>${P.real?checksHtml(P.real.checks)+`<p class="small muted">Validado el ${esc(P.real.at)}. El cambio obligatorio de contraseña de la misión A no se puede comprobar con <code>net user</code>: tu profesor puede revisarlo en tu SRV01.</p>`:'<p>Sin validar.</p>'}
+   <details><summary>Registro de actividad en el simulador (${P.log.length} entradas)</summary><pre class="small">${esc(P.log.join('\n'))}</pre></details>
+   <p class="tip noprint">📌 Cuando termines, vuelve a habilitar a Pedro en tu SRV01 (<code>net user plopez /active:yes</code>) para las próximas prácticas.</p>
+   <div class="row noprint"><button class="btn primary" data-act="print">🖨 Guardar como PDF / imprimir</button></div></section>`;
+}
+function localGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
+function render(){
+  renderHeader();
+  if(!P)return renderLogin();
+  ({1:renderPhase1,2:renderPhase2,3:renderPhase3,4:renderReport})[P.screen]();
+  window.scrollTo(0,0);
+}
+function go(p){
+  p=Number(p);
+  if(p===3&&currentId()&&P.maxPhase<3){toast('Antes tienes que resolver todos los tickets de la semana.');return;}
+  if(p>P.maxPhase)P.maxPhase=p;P.screen=p;if(p===2)P.view=null;save();render();
+}
+
+/* ================= acciones (delegación) ================= */
+const ACT={
+  go:a=>go(a.dataset.p),
+  tab:a=>showTab(a.dataset.tab),
+  run:()=>dlgRun(),
+  copy:a=>{const t=a.dataset.txt;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('Copiado al portapapeles ✔'),()=>{toast('Selecciona el texto y cópialo con Ctrl+C');});},
+  lab1:()=>{const text=$('#lab1-in').value;const L=lab1Checks(text);P.lab1={text,checks:L,at:now()};logEv(`Fase 1: ${L.filter(c=>c.ok).length}/${L.length}`);save();$('#lab1-res').innerHTML=resLab1(L);renderPhase1();},
+  real:()=>{const text=$('#real-in').value;const L=realChecks(text);const ok=L.filter(c=>c.ok).length;P.real={text,checks:L,ok,total:L.length,at:now()};logEv(`Fase 3: ${ok}/${L.length}`);save();renderPhase3();renderHeader();$('#real-res').scrollIntoView({behavior:'smooth'});},
+  print:()=>window.print(),
+  reset:()=>{if(!P)return;const v=prompt('Se borrará TODO tu progreso en este navegador. Escribe REINICIAR para confirmar:');if(v!=='REINICIAR')return;
+    try{localStorage.removeItem(KEY);localStorage.setItem(RKEY,String(Number(localGet(RKEY)||0)+1));}catch(e){}P=null;render();},
+  'tk-open':a=>{P.view=a.dataset.id===currentId()?null:a.dataset.id;renderInbox();renderTicket();$('#ticket').scrollIntoView({block:'nearest'});},
+  'tk-solve':()=>solve(),
+  'tk-next':()=>{P.view=null;save();renderInbox();renderTicket();},
+  'mmc-view':a=>{gui.view=a.dataset.v;gui.sel=null;renderMMC();},
+  'mmc-sel':a=>{gui.sel=a.dataset.sid;renderMMC();},
+  'mmc-newuser':()=>dlgNewUser(),'mmc-newgroup':()=>dlgGroup(null),'mmc-refresh':()=>renderMMC(),
+  'mmc-setpw':()=>{const u=S().users[gui.sel];if(u)dlgSetPw(u);},
+  'mmc-del':()=>mmcDelete(),'mmc-props':()=>mmcProps(),
+  'mmc-ren':()=>{const o=S().users[gui.sel]||S().groups[gui.sel];if(o)dlgRename(o,!!S().users[gui.sel]);},
+};
+document.addEventListener('click',e=>{const a=e.target.closest('[data-act]');if(a&&ACT[a.dataset.act]){if(a.tagName==='BUTTON')e.preventDefault();ACT[a.dataset.act](a,e);}});
+document.addEventListener('dblclick',e=>{const tr=e.target.closest('tr[data-sid]');if(tr){gui.sel=tr.dataset.sid;renderMMC();mmcProps();}});
+load();render();
+</script>
+</body>
+</html>
