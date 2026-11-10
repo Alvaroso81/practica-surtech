@@ -144,7 +144,7 @@ main{padding:18px 16px 40px}
 footer{text-align:center;color:var(--mut);font-size:12px;padding:10px}
 footer button{background:none;border:0;color:var(--mut);text-decoration:underline}
 .grade{font-size:42px;font-weight:800;color:var(--acc)}
-@media print{#hdr,footer,.noprint{display:none!important}body{background:#fff;color:#000}.card{border:1px solid #999;background:#fff;color:#000;max-width:none}pre,code{background:#f4f4f4;color:#000}.tbl th{background:#eee}.muted{color:#444}}
+@media print{.checks li,.q,.note,.learn,.fb,.tip{background:#f4f4f4!important;color:#000!important;border-color:#bbb!important}#hdr,footer,.noprint{display:none!important}body{background:#fff;color:#000}.card{border:1px solid #999;background:#fff;color:#000;max-width:none}pre,code{background:#f4f4f4;color:#000}.tbl th{background:#eee}.muted{color:#444}}
 </style>
 </head>
 <body>
@@ -173,11 +173,15 @@ function addDays(s,n){const [dp,tp]=s.split(' ');const [d,m,y]=dp.split('/').map
 function toast(t){const el=$('#toast');el.textContent=t;el.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>el.style.display='none',4500);}
 
 /* ================= estado ================= */
-const KEY='surtech-ud2-v1', RKEY='surtech-ud2-resets';
+// progreso guardado por alumno: varios alumnos pueden compartir el mismo equipo/navegador
+const KEY='surtech-ud2-v1', CUR='surtech-ud2-actual', RKEY='surtech-ud2-resets';
+const pkey=seed=>KEY+':'+seed;
 let P=null;
 const S=()=>P.server;
-function load(){try{const j=localStorage.getItem(KEY);if(j)P=JSON.parse(j);}catch(e){P=null;}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(P));}catch(e){}}
+function loadSeed(seed){try{const j=localStorage.getItem(pkey(seed));return j?JSON.parse(j):null;}catch(e){return null;}}
+function load(){try{const c=localStorage.getItem(CUR);P=c?loadSeed(c):null;}catch(e){P=null;}}
+function save(){try{localStorage.setItem(pkey(P.seed),JSON.stringify(P));localStorage.setItem(CUR,P.seed);}catch(e){}}
+const resets=()=>Number(localGet(RKEY+':'+(P?.seed||''))||0);
 function logEv(s){P.log.push(`[${hhmm()}] ${s}`);if(P.log.length>600)P.log.shift();}
 
 const NOMBRES=['Lucía','Javier','Irene','Sergio','Nerea','Adrián','Paula','Hugo','Carla','Iker','Marta','Raúl','Sara','Diego','Elena','Óscar'];
@@ -683,7 +687,7 @@ const TICKETS=[
    items:[{l:'<code>net localgroup Ventas pl0pez /add</code><pre>Error de sistema 1332.\nNo se ha efectuado ninguna asignación entre los nombres de cuenta y los identificadores de seguridad.</pre>',a:0},
           {l:'<code>net localgroup Venta plopez /add</code><pre>Error de sistema 1376.\nEl grupo local especificado no existe.</pre>',a:1},
           {l:'<code>net localgroup Contabilidad aruiz /add</code><pre>Error de sistema 1378.\nEl nombre de cuenta especificado ya es miembro del grupo.</pre>',a:2},
-          {l:'<code>net user aruiz /active:yes</code> (en una ventana normal de CMD)<pre>Error de sistema 5.\nAcceso denegado.</pre>',a:3},
+          {l:'<code>net user aruiz /active:yes</code> (con un usuario administrador, en un CMD abierto sin «Ejecutar como administrador»)<pre>Error de sistema 5.\nAcceso denegado.</pre>',a:3},
           {l:'<code>net user plopes</code><pre>No se encuentra el nombre de usuario.</pre>',a:0}]},
      {id:'q2',type:'choice',text:'Iván ejecuta <code>net localgroup Ventas plopez /delete</code>. ¿Qué le ocurre a la cuenta de Pedro?',options:['Sigue existiendo; solo deja de pertenecer al grupo Ventas','Se elimina la cuenta','Se deshabilita la cuenta','Pierde su contraseña'],answer:0}],
  learn:'Leer bien los mensajes de error es la mitad de la solución: casi siempre indican si falla el usuario, el grupo o los permisos de la consola.'},
@@ -880,7 +884,7 @@ function renderHeader(){
   const g=grades();
   h.innerHTML=`<div class="brand">Sur<span>Tech</span> S.L.</div>
    <nav class="steps">${[1,2,3,4].map(i=>`<button class="step ${P.screen===i?'on':''} ${i<P.maxPhase?'done':''}" data-act="go" data-p="${i}" ${i>P.maxPhase?'disabled':''}>${PHASES[i]}</button>`).join('')}</nav>
-   <span class="pill">👤 ${esc(P.student.nombre)} · 🎫 ${ticketsDone()}/${TICKETS.length} · ⭐ ${Math.round(g.sim*10)/10} pts</span>`;
+   <button class="step" data-act="logout" title="Otro alumno quiere usar este equipo">Cambiar de alumno</button><span class="pill">👤 ${esc(P.student.nombre)} · 🎫 ${ticketsDone()}/${TICKETS.length} · ⭐ ${Math.round(g.sim*10)/10} pts</span>`;
 }
 function renderLogin(){
   $('#main').innerHTML=`<section class="card">
@@ -891,15 +895,28 @@ function renderLogin(){
     <li><b>Semana en SurTech</b>: resuelve los tickets de la empresa en un servidor simulado con consola y <code>lusrmgr.msc</code>. Lo que hagas tiene consecuencias.</li>
     <li><b>Misión real</b>: aplica los cambios en tu SRV01 y demuéstralo pegando la salida de los comandos.</li>
     <li><b>Informe</b>: obtén tu nota y entrégala (PDF).</li></ol>
-   <p class="tip">⚠️ Escribe tu nombre real: a partir de él se genera <b>tu propio escenario</b> (el trabajador que tendrás que dar de alta es distinto para cada alumno). El progreso se guarda en este navegador.</p>
+   <div class="tip"><p style="margin:0 0 6px">⚠️ <b>Antes de empezar:</b></p><ul style="margin:0;padding-left:20px">
+    <li>Escribe tu <b>nombre real</b> (siempre igual): a partir de él se genera <b>tu propio escenario</b>; el trabajador que darás de alta es distinto para cada alumno.</li>
+    <li>El progreso se guarda <b>en este navegador y este equipo</b>. Haz toda la práctica en el mismo sitio. Si cierras y vuelves, escribe el mismo nombre y continuarás donde lo dejaste.</li>
+    <li>Necesitarás tu <b>SRV01 encendido</b> en las fases 1 y 3, y poder <b>copiar y pegar</b> desde SRV01 hasta esta web (lee la ayuda de la fase 1).</li></ul></div>
    <form id="login"><label class="field">Nombre<input name="nombre" required autocomplete="given-name"></label>
    <label class="field">Apellidos<input name="apellidos" required autocomplete="family-name"></label>
    <label class="field">Grupo (opcional)<input name="grupo" placeholder="2.º SMR A"></label>
    <button class="btn primary">Empezar →</button></form></section>`;
   $('#login').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);
     const st={nombre:String(f.get('nombre')).trim(),apellidos:String(f.get('apellidos')).trim(),grupo:String(f.get('grupo')||'').trim()};
-    if(!st.nombre||!st.apellidos)return;P=newProgress(st);logEv(`Inicio de la práctica: ${st.nombre} ${st.apellidos}`);save();render();};
+    if(!st.nombre||!st.apellidos)return;
+    const prev=loadSeed(norm(st.nombre+' '+st.apellidos));
+    if(prev){P=prev;toast(`Bienvenido/a de nuevo, ${st.nombre}: continúas donde lo dejaste.`);}
+    else{P=newProgress(st);logEv(`Inicio de la práctica: ${st.nombre} ${st.apellidos}`);}
+    save();render();};
 }
+const CLIP_HELP=`<details class="tip" style="margin:10px 0"><summary><b>💡 ¿No se pega nada? Lee esto (CMD, VirtualBox y portapapeles)</b></summary><ul style="margin:6px 0 0;padding-left:20px">
+ <li>Usa <b>CMD</b> (<code>Windows + R</code> → <code>cmd</code>), <b>no PowerShell</b>: en PowerShell el símbolo <code>&amp;</code> da error.</li>
+ <li>Con <code>| clip</code> <b>no verás nada en la consola</b>: es normal, la salida ha ido directamente al portapapeles. Después solo tienes que pegar aquí con <code>Ctrl+V</code>.</li>
+ <li>Si esta web está abierta <b>fuera de SRV01</b> (en tu ordenador o en CLIENTE01), activa en la ventana de VirtualBox de SRV01: <b>Dispositivos → Portapapeles compartido → Bidireccional</b> (necesita las Guest Additions instaladas).</li>
+ <li>Otra opción: abre esta web en el navegador de SRV01 (tiene Internet por la red NAT). Pero entonces haz <b>toda la práctica</b> en ese navegador, porque el progreso se guarda donde empiezas.</li>
+ <li>Si las tildes salen raras al pegar (por ejemplo <i>Mar¡a</i>), no pasa nada: la web lo entiende.</li></ul></details>`;
 function copyBtn(txt){return `<button class="btn small" data-act="copy" data-txt="${esc(txt)}">📋 Copiar</button>`;}
 const PREP=`net user mgarcia Temporal.2026 /add /fullname:"María García" /comment:"Contabilidad"
 net user plopez Temporal.2026 /add /fullname:"Pedro López" /comment:"Ventas"
@@ -925,13 +942,14 @@ function renderPhase1(){
    <table class="tbl"><tr><th>Grupo local</th><th>Miembros</th></tr>
    <tr><td><code>Ventas</code></td><td>plopez</td></tr><tr><td><code>Contabilidad</code></td><td>mgarcia, aruiz</td></tr><tr><td><code>Administracion</code> (sin tilde)</td><td>ninguno</td></tr></table>
    <details><summary><b>¿Te falta algo o vas retrasado? Comandos para dejarlo listo</b></summary>
-   <p class="small muted">Pégalos en CMD como Administrador. Si algo ya existe verás un error («La cuenta ya existe», «Error de sistema 1379» o «1378»): no pasa nada, ignóralo. Contraseña inicial de ejemplo: <code>Temporal.2026</code>.</p>
+   <p class="small muted">Pégalos en CMD como Administrador y pulsa <code>Intro</code> al final para que se ejecute la última línea. Si algo ya existe verás un error («La cuenta ya existe», «Error de sistema 1379» o «1378»): no pasa nada, ignóralo. Contraseña inicial de ejemplo: <code>Temporal.2026</code>. <b>Úsalos solo antes de la fase 3</b>: vuelven a habilitar a Pedro.</p>
    <div class="copyrow"><pre>${esc(PREP)}</pre>${copyBtn(PREP)}</div></details>
    <h3>Comprobación</h3>
    <ol><li>Arranca <code>SRV01</code> en VirtualBox e inicia sesión como <b>Administrador</b>.</li>
    <li>Abre el símbolo del sistema: <code>Windows + R</code> → <code>cmd</code>.</li>
    <li>Ejecuta este comando (la salida se copia al portapapeles gracias a <code>| clip</code>):</li></ol>
    <div class="copyrow"><pre>${esc(c1)}</pre>${copyBtn(c1)}</div>
+   ${CLIP_HELP}
    <p>4. Pega aquí la salida (<code>Ctrl+V</code>) y pulsa <b>Comprobar</b>:</p>
    <textarea class="paste" id="lab1-in" placeholder="Cuentas de usuario de \\\\SRV01 ...">${esc(P.lab1?.text||'')}</textarea>
    <div class="row"><button class="btn primary" data-act="lab1">Comprobar</button></div>
@@ -955,9 +973,10 @@ function renderPhase3(){
    <tr><td><b>B</b> · Facturas</td><td>Grupo <code>Facturas</code> con descripción. Miembros: Pedro y Ana.</td></tr>
    <tr><td><b>C</b> · Traslado</td><td>María pasa a Administración: descripción actualizada, fuera de Contabilidad, dentro de <code>Administracion</code> y con la cuenta activa.</td></tr>
    <tr><td><b>D</b> · Permiso</td><td>Pedro está de permiso: nadie puede iniciar sesión con su cuenta, pero debe conservar sus grupos.</td></tr></table>
-   <p class="tip">💡 Si en tu SRV01 faltan cuentas o grupos de clase, créalos primero (mira la fase 1).</p>
+   <p class="tip">💡 Si en tu SRV01 faltan cuentas o grupos de clase, créalos <b>antes</b> de empezar las misiones (fase 1). No vuelvas a pegar los comandos de preparación después de la misión D: habilitarían otra vez a Pedro.</p>
    <h3>Demuéstralo</h3><p>En CMD como Administrador ejecuta (copia la salida al portapapeles) y pégala abajo:</p>
    <div class="copyrow"><pre>${esc(cmd)}</pre>${copyBtn(cmd)}</div>
+   ${CLIP_HELP}
    <textarea class="paste" id="real-in" placeholder="Pega aquí la salida completa">${esc(P.real?.text||'')}</textarea>
    <div class="row"><button class="btn primary" data-act="real">Validar en mi SRV01</button></div>
    <div id="real-res">${P.real?resReal(P.real):''}</div>
@@ -970,7 +989,7 @@ function renderReport(){
   $('#main').innerHTML=`<section class="card"><h2>Informe final · Práctica global UD2</h2>
    <table class="tbl"><tr><th>Alumno/a</th><td>${esc(P.student.nombre)} ${esc(P.student.apellidos)}</td><th>Grupo</th><td>${esc(P.student.grupo||'—')}</td></tr>
    <tr><th>Inicio</th><td>${esc(P.started)}</td><th>Informe</th><td>${esc(now())}</td></tr>
-   <tr><th>Nueva incorporación</th><td>${esc(P.hire.full)}</td><th>Reinicios</th><td>${esc(localGet(RKEY)||'0')}</td></tr></table>
+   <tr><th>Nueva incorporación</th><td>${esc(P.hire.full)}</td><th>Reinicios</th><td>${resets()}</td></tr></table>
    <div class="row" style="align-items:center;gap:24px"><div><div class="muted small">NOTA FINAL</div><div class="grade">${f(g.final)}</div></div>
    <div class="small">Semana en SurTech (60 %): <b>${f(g.simN)}</b> / 10 · ${f(g.sim)} de ${TICKETS.length*10} pts<br>Misión real en SRV01 (40 %): <b>${f(g.realN)}</b> / 10 ${P.real?`· ${P.real.ok}/${P.real.total} comprobaciones`:'· sin validar'}</div></div>
    ${ticketsDone()<TICKETS.length?`<p class="note">⚠️ Faltan ${TICKETS.length-ticketsDone()} tickets por resolver: puntúan 0.</p>`:''}
@@ -1005,8 +1024,9 @@ const ACT={
   lab1:()=>{const text=$('#lab1-in').value;const L=lab1Checks(text);P.lab1={text,checks:L,at:now()};logEv(`Fase 1: ${L.filter(c=>c.ok).length}/${L.length}`);save();$('#lab1-res').innerHTML=resLab1(L);renderPhase1();},
   real:()=>{const text=$('#real-in').value;const L=realChecks(text);const ok=L.filter(c=>c.ok).length;P.real={text,checks:L,ok,total:L.length,at:now()};logEv(`Fase 3: ${ok}/${L.length}`);save();renderPhase3();renderHeader();$('#real-res').scrollIntoView({behavior:'smooth'});},
   print:()=>window.print(),
-  reset:()=>{if(!P)return;const v=prompt('Se borrará TODO tu progreso en este navegador. Escribe REINICIAR para confirmar:');if(v!=='REINICIAR')return;
-    try{localStorage.removeItem(KEY);localStorage.setItem(RKEY,String(Number(localGet(RKEY)||0)+1));}catch(e){}P=null;render();},
+  reset:()=>{if(!P)return;const v=prompt(`Se borrará TODO el progreso de ${P.student.nombre} ${P.student.apellidos} en este navegador. Escribe REINICIAR para confirmar:`);if(v!=='REINICIAR')return;
+    try{localStorage.setItem(RKEY+':'+P.seed,String(resets()+1));localStorage.removeItem(pkey(P.seed));localStorage.removeItem(CUR);}catch(e){}P=null;render();},
+  logout:()=>{save();try{localStorage.removeItem(CUR);}catch(e){}P=null;render();},
   'tk-open':a=>{P.view=a.dataset.id===currentId()?null:a.dataset.id;renderInbox();renderTicket();$('#ticket').scrollIntoView({block:'nearest'});},
   'tk-solve':()=>solve(),
   'tk-next':()=>{P.view=null;save();renderInbox();renderTicket();},
