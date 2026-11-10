@@ -747,7 +747,7 @@ function solve(){
   const failed=checks.filter(c=>!c[1]);
   if(!fatal&&failed.length){
     rec.attempts++;logEv(`Ticket ${id}: intento fallido (${failed.map(f=>f[0]).join('; ')})`);save();renderHeader();
-    fb(`<b>El ticket todavía no está resuelto</b> (intento fallido nº ${rec.attempts}${t.urgent?'':', −1 punto'}). Revisa en el servidor:<ul class="checks">${failed.map(f=>`<li class="ko"><span class="ic">✗</span>${esc(f[0])}</li>`).join('')}</ul>`);return;}
+    fb(`<b>El ticket todavía no está resuelto</b> (intento fallido nº ${rec.attempts}${t.urgent?'':', −1 punto'}).<br>Tus respuestas <b>aún no se han corregido</b>: primero tienes que hacer el cambio en el <b>servidor simulado</b> (panel de la derecha: PowerShell o «Usuarios y grupos locales»), no en tu SRV01 real. Falta esto:<ul class="checks">${failed.map(f=>`<li class="ko"><span class="ic">✗</span>${esc(f[0])}</li>`).join('')}</ul>`);return;}
   const actionMax=t.urgent?0:(t.checks?6:0);
   let pts=actionMax?(fatal?0:Math.max(2,actionMax-rec.attempts)):0;
   const qMax=t.urgent||!t.qs.length?0:(10-actionMax)/t.qs.length;
@@ -778,7 +778,7 @@ function renderTicket(){
   if(!rec.done){
     el.innerHTML=`${head}${t.qs.map(q=>qHtml(t,q,rec)).join('')}<div id="tk-fb"></div>
      <div class="row" style="margin-top:12px"><button class="btn primary" data-act="tk-solve">✔ Marcar como resuelto</button></div>
-     <p class="small muted">${t.checks?'Al marcarlo como resuelto se comprueba el estado REAL del servidor simulado. Cada intento fallido resta 1 punto.':'Este ticket solo tiene preguntas: tendrás un único intento.'}</p>`;
+     <p class="small muted">${t.checks?'⚙️ Este ticket tiene dos partes: <b>hacer el cambio en el servidor simulado</b> (panel de la derecha, no en tu SRV01) y <b>responder las preguntas</b>. Al marcarlo como resuelto se comprueba primero el servidor; cada intento fallido resta 1 punto.':'Este ticket solo tiene preguntas: tendrás un único intento.'}</p>`;
   }else{
     const nxt=currentId();
     el.innerHTML=`${head}
