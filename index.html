@@ -798,8 +798,8 @@ function parseNet(text){
   for(const raw of lines){
     const line=raw.replace(/\s+$/,'');let m;
     if((m=line.match(/^\s*(Cuentas de usuario de|User accounts for)\s+\\\\(\S+)/i))){cur={type:'list',host:m[2],names:[],dash:false};res.userLists.push(cur);continue;}
-    if((m=line.match(/^(Nombre de usuario|User name)\s{2,}(\S.*)$/i))){cur={type:'user',name:m[2].trim(),f:{},groups:[],inG:false};res.users[cur.name.toLowerCase()]=cur;continue;}
-    if((m=line.match(/^(Nombre de alias|Alias name)\s{2,}(\S.*)$/i))){cur={type:'group',name:m[2].trim(),comment:'',members:[],dash:false};res.groups[skel(cur.name)]=cur;continue;}
+    if((m=line.match(/^(Nombre de usuario|User name)\s+(\S.*)$/i))){cur={type:'user',name:m[2].trim(),f:{},groups:[],inG:false};res.users[cur.name.toLowerCase()]=cur;continue;}
+    if((m=line.match(/^(Nombre de alias|Alias name)\s+(\S.*)$/i))){cur={type:'group',name:m[2].trim(),comment:'',members:[],dash:false};res.groups[skel(cur.name)]=cur;continue;}
     if(!cur)continue;
     if(/(completado el comando|command completed)/i.test(line)||/^(Error de sistema|System error)/i.test(line)){cur=null;continue;}
     if(cur.type==='list'){if(/^-{10,}/.test(line)){cur.dash=true;continue;}if(cur.dash&&line.trim())cur.names.push(...line.trim().split(/\s+/));}
@@ -809,8 +809,11 @@ function parseNet(text){
       const gl=line.match(/^(Miembros del grupo local|Local Group Memberships)\s*(.*)$/i);
       if(gl){cur.inG=true;cur.groups.push(...gl[2].split('*').map(s=>s.trim()).filter(Boolean));continue;}
       if(/^(Miembros del grupo global|Global Group memberships)/i.test(line)){cur.inG=false;continue;}
-      if(cur.inG&&/^\s+\*/.test(raw)){cur.groups.push(...line.split('*').map(s=>s.trim()).filter(Boolean));continue;}
+      if(cur.inG&&/^\s*\*/.test(raw)){cur.groups.push(...line.split('*').map(s=>s.trim()).filter(Boolean));continue;}
       cur.inG=false;
+      // etiquetas conocidas primero: así funciona aunque al copiar se pierdan los espacios de alineación
+      const k=line.match(/^(Nombre completo|Full Name|Comentario del usuario|User's comment|Comentario|Comment|Cuenta activa|Account active)(?:\s+(.*))?$/i);
+      if(k){cur.f[norm(k[1])]=(k[2]||'').trim();continue;}
       const f=line.match(/^(.+?)\s{2,}(.*)$/);if(f)cur.f[norm(f[1])]=f[2].trim();else if(line.trim())cur.f[norm(line.trim())]='';
     }
   }
